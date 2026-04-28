@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Services — Wisdom Dev · Développeur Web Cotonou</title>
+<meta name="description" content="Sites vitrines, plateformes, applications web. Expliqué simplement sans jargon. Développeur web à Cotonou, Bénin.">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+  :root{
+    --indigo:#818cf8;--purple:#c084fc;--pink:#f472b6;
+    --gold:#f7c97e;--cyan:#00d4ff;
+    --dark:#060412;--darker:#030209;
+    --text:#e8eeff;--muted:#4a4070;
+    --border:rgba(129,140,248,0.12);--surface:rgba(129,140,248,0.04);
+  }
+  html{scroll-behavior:smooth;}
+  body{background:var(--darker);color:var(--text);font-family:'Rajdhani',sans-serif;font-size:17px;line-height:1.7;overflow-x:hidden;cursor:none;}
+
+  .cursor{position:fixed;width:10px;height:10px;background:var(--pink);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .2s,height .2s,background .2s;mix-blend-mode:screen;}
+  .cursor-ring{position:fixed;width:36px;height:36px;border:1px solid var(--indigo);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:all .12s ease;mix-blend-mode:screen;}
+
+  canvas#binary{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:0.35;}
+  .vignette{position:fixed;inset:0;background:radial-gradient(ellipse at 50% 30%,rgba(3,2,9,0.5) 0%,rgba(3,2,9,0.92) 70%);z-index:1;pointer-events:none;}
+
+  nav{position:fixed;top:0;width:100%;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:1.2rem 5%;background:rgba(3,2,9,0.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);}
+  .logo-svg{height:36px;}
+  nav ul{display:flex;gap:2rem;list-style:none;}
+  nav a{color:var(--muted);text-decoration:none;font-family:'Share Tech Mono',monospace;font-size:0.78rem;letter-spacing:3px;text-transform:uppercase;transition:color .3s;}
+  nav a:hover,nav a.active{color:var(--indigo);}
+  .nav-status{font-family:'Share Tech Mono',monospace;font-size:0.7rem;letter-spacing:2px;color:#4ade80;display:flex;align-items:center;gap:6px;}
+  .pulse{width:6px;height:6px;border-radius:50%;background:#4ade80;animation:pulse-anim 2s ease-in-out infinite;}
+  @keyframes pulse-anim{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
+
+  .page{position:relative;z-index:10;max-width:1100px;margin:0 auto;padding:8rem 5% 6rem;}
+
+  .eyebrow{font-family:'Share Tech Mono',monospace;font-size:0.72rem;letter-spacing:5px;color:var(--indigo);text-transform:uppercase;margin-bottom:1rem;display:flex;align-items:center;gap:12px;opacity:0;animation:fadeUp .8s ease forwards .2s;}
+  .eyebrow::before{content:'';width:30px;height:1px;background:linear-gradient(90deg,transparent,var(--indigo));}
+
+  h1{font-size:clamp(2.2rem,6vw,4rem);font-weight:700;line-height:1.1;letter-spacing:-1px;opacity:0;animation:fadeUp .8s ease forwards .35s;}
+  h1 .grad{background:linear-gradient(135deg,var(--indigo),var(--purple),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+
+  .page-intro{font-size:1.05rem;color:var(--muted);max-width:540px;margin-top:1rem;line-height:1.7;opacity:0;animation:fadeUp .8s ease forwards .5s;}
+
+  /* SERVICES PRINCIPAUX */
+  .services-main{margin-top:3rem;display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--border);opacity:0;animation:fadeUp .8s ease forwards .65s;}
+
+  .service-card{background:rgba(3,2,9,0.92);padding:2.2rem;position:relative;overflow:hidden;transition:background .3s;}
+  .service-card::after{content:'';position:absolute;bottom:0;left:0;width:100%;height:2px;background:linear-gradient(90deg,var(--indigo),var(--pink));transform:scaleX(0);transform-origin:left;transition:transform .4s ease;}
+  .service-card:hover{background:var(--surface);}
+  .service-card:hover::after{transform:scaleX(1);}
+  .service-card.wide{grid-column:span 2;}
+
+  .s-icon{font-size:2.2rem;margin-bottom:1rem;display:block;}
+  .s-num{position:absolute;top:1.5rem;right:1.5rem;font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--border);letter-spacing:2px;}
+  .s-tag{font-family:'Share Tech Mono',monospace;font-size:0.65rem;letter-spacing:4px;margin-bottom:0.5rem;text-transform:uppercase;}
+  .service-card h2{font-size:1.3rem;font-weight:700;color:var(--text);margin-bottom:0.7rem;}
+  .service-card p{font-size:0.93rem;color:var(--muted);line-height:1.7;margin-bottom:1.2rem;}
+
+  .use-cases{display:flex;flex-wrap:wrap;gap:0.4rem;margin-top:0.8rem;}
+  .use-case{font-family:'Share Tech Mono',monospace;font-size:0.65rem;padding:0.25rem 0.7rem;border:1px solid var(--border);color:var(--muted);letter-spacing:1px;transition:all .2s;}
+  .service-card:hover .use-case{border-color:rgba(129,140,248,0.3);color:var(--indigo);}
+
+  .s-includes{margin-top:1.2rem;padding-top:1.2rem;border-top:1px solid var(--border);}
+  .s-includes-label{font-family:'Share Tech Mono',monospace;font-size:0.62rem;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-bottom:0.6rem;}
+  .s-includes ul{list-style:none;}
+  .s-includes li{font-size:0.88rem;color:var(--muted);padding:0.25rem 0;display:flex;align-items:center;gap:0.5rem;}
+  .s-includes li::before{content:'→';color:var(--indigo);font-family:'Share Tech Mono',monospace;font-size:0.75rem;flex-shrink:0;}
+  .s-includes li strong{color:var(--text);}
+
+  /* PROCESSUS */
+  .process-section{margin-top:5rem;opacity:0;animation:fadeUp .8s ease forwards .9s;}
+  .section-eyebrow{font-family:'Share Tech Mono',monospace;font-size:0.68rem;letter-spacing:5px;color:var(--indigo);text-transform:uppercase;margin-bottom:0.8rem;display:flex;align-items:center;gap:12px;}
+  .section-eyebrow::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--border),transparent);}
+  .section-title{font-size:1.8rem;font-weight:700;color:var(--text);margin-bottom:2rem;}
+
+  .process-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);}
+  .step{background:rgba(3,2,9,0.92);padding:1.8rem 1.5rem;position:relative;overflow:hidden;transition:background .3s;}
+  .step:hover{background:var(--surface);}
+  .step-num{font-family:'Share Tech Mono',monospace;font-size:2.5rem;font-weight:700;line-height:1;margin-bottom:1rem;background:linear-gradient(135deg,var(--indigo),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+  .step h3{font-size:1.05rem;font-weight:700;color:var(--text);margin-bottom:0.5rem;}
+  .step p{font-size:0.85rem;color:var(--muted);line-height:1.6;}
+  .step-connector{position:absolute;top:2rem;right:-1px;width:2px;height:2rem;background:linear-gradient(180deg,var(--indigo),transparent);z-index:1;}
+
+  /* POURQUOI MOI */
+  .why-section{margin-top:5rem;opacity:0;animation:fadeUp .8s ease forwards 1.1s;}
+  .why-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);}
+  .why-card{background:rgba(3,2,9,0.92);padding:1.8rem;transition:background .3s;}
+  .why-card:hover{background:var(--surface);}
+  .why-icon{font-size:1.6rem;margin-bottom:0.8rem;}
+  .why-title{font-size:1rem;font-weight:700;color:var(--text);margin-bottom:0.4rem;}
+  .why-desc{font-size:0.88rem;color:var(--muted);line-height:1.6;}
+
+  /* CTA */
+  .cta-section{margin-top:4rem;padding:2.5rem;border:1px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:space-between;gap:2rem;flex-wrap:wrap;opacity:0;animation:fadeUp .8s ease forwards 1.3s;}
+  .cta-text h3{font-size:1.4rem;font-weight:700;color:var(--text);margin-bottom:0.4rem;}
+  .cta-text p{font-size:0.93rem;color:var(--muted);}
+  .cta-btns{display:flex;gap:1rem;flex-wrap:wrap;}
+  .btn{padding:.85rem 2rem;font-family:'Rajdhani',sans-serif;font-size:1rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;text-decoration:none;cursor:none;transition:all .3s;display:inline-block;}
+  .btn-primary{background:linear-gradient(135deg,var(--indigo),var(--pink));color:#fff;border:none;}
+  .btn-outline{border:1px solid var(--indigo);color:var(--indigo);background:transparent;}
+  .btn-outline:hover{background:rgba(129,140,248,0.08);}
+
+  footer{position:relative;z-index:10;text-align:center;padding:2rem;border-top:1px solid var(--border);font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--muted);letter-spacing:3px;}
+  .wa-float{position:fixed;bottom:2rem;right:2rem;z-index:200;display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--indigo),var(--pink));padding:.75rem 1.4rem;text-decoration:none;color:#fff;font-family:'Share Tech Mono',monospace;font-size:.72rem;letter-spacing:2px;box-shadow:0 0 30px rgba(244,114,182,.3);transition:box-shadow .3s;}
+  .wa-float:hover{box-shadow:0 0 50px rgba(244,114,182,.5);}
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+
+  @media(max-width:768px){
+    nav ul{display:none;}
+    body{cursor:auto;}
+    .cursor,.cursor-ring{display:none;}
+    .page{padding:7rem 5% 4rem;}
+    .services-main{grid-template-columns:1fr;}
+    .service-card.wide{grid-column:span 1;}
+    .process-steps{grid-template-columns:repeat(2,1fr);}
+    .why-grid{grid-template-columns:1fr;}
+    .cta-section{flex-direction:column;}
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursor-ring"></div>
+<canvas id="binary"></canvas>
+<div class="vignette"></div>
+
+<nav>
+  <a href="index.html">
+    <svg class="logo-svg" viewBox="0 0 220 40" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="ng" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#818cf8"/><stop offset="100%" stop-color="#f472b6"/></linearGradient>
+        <linearGradient id="nd" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#f7c97e"/><stop offset="100%" stop-color="#f472b6"/></linearGradient>
+      </defs>
+      <rect x="0" y="4" width="4" height="32" rx="2" fill="url(#ng)"/>
+      <text x="12" y="20" font-family="Courier New,monospace" font-size="13" font-weight="700" fill="#e8eeff" letter-spacing="1">WISDOM</text>
+      <text x="12" y="35" font-family="Courier New,monospace" font-size="13" font-weight="700" fill="url(#nd)" letter-spacing="1">DEV</text>
+    </svg>
+  </a>
+  <ul>
+    <li><a href="services.html" class="active">Services</a></li>
+    <li><a href="pricing.html">Tarifs</a></li>
+    <li><a href="projects.html">Projets</a></li>
+    <li><a href="about.html">À propos</a></li>
+    <li><a href="contact.html">Contact</a></li>
+  </ul>
+  <div class="nav-status"><div class="pulse"></div>DISPONIBLE</div>
+</nav>
+
+<div class="page">
+
+  <div class="eyebrow">// 01 · Services</div>
+  <h1>Ce que je <span class="grad">construis</span><br>pour vous.</h1>
+  <p class="page-intro">Pas de jargon. Pas de promesses vides. Voici exactement ce que je fais, pour qui, et pourquoi ça change quelque chose pour votre business.</p>
+
+  <!-- SERVICES -->
+  <div class="services-main">
+
+    <!-- Site vitrine -->
+    <div class="service-card">
+      <span class="s-icon">🏪</span>
+      <div class="s-num">01</div>
+      <div class="s-tag" style="color:var(--indigo);">Le plus demandé</div>
+      <h2>Site Vitrine</h2>
+      <p>Votre carte de visite sur internet. Quand quelqu'un tape votre nom ou votre activité sur Google, il tombe sur vous. Vos horaires, vos services, votre localisation — tout est là, disponible 24h/24.</p>
+      <div class="use-cases">
+        <span class="use-case">Boutiques</span>
+        <span class="use-case">Restaurants</span>
+        <span class="use-case">Artisans</span>
+        <span class="use-case">Médecins</span>
+        <span class="use-case">Prestataires</span>
+      </div>
+      <div class="s-includes">
+        <div class="s-includes-label">// Ce qui est inclus</div>
+        <ul>
+          <li>Design <strong>personnalisé</strong> à vos couleurs</li>
+          <li>Optimisé <strong>mobile et téléphone</strong></li>
+          <li>Bouton <strong>WhatsApp</strong> intégré</li>
+          <li>Visible sur <strong>Google</strong> (SEO de base)</li>
+          <li>Localisation <strong>Google Maps</strong></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Site catalogue -->
+    <div class="service-card">
+      <span class="s-icon">🛒</span>
+      <div class="s-num">02</div>
+      <div class="s-tag" style="color:var(--purple);">Vendre en ligne</div>
+      <h2>Site avec Catalogue</h2>
+      <p>Un site vitrine avec en plus une liste complète de vos produits ou services — photos, prix, descriptions. Vos clients voient exactement ce que vous proposez avant même de vous appeler. Moins de questions, plus de clients sérieux.</p>
+      <div class="use-cases">
+        <span class="use-case">Mode & textile</span>
+        <span class="use-case">Épiceries</span>
+        <span class="use-case">Ateliers</span>
+        <span class="use-case">Fournisseurs</span>
+      </div>
+      <div class="s-includes">
+        <div class="s-includes-label">// Ce qui est inclus</div>
+        <ul>
+          <li>Catalogue produits avec <strong>photos</strong></li>
+          <li>Filtres par <strong>catégorie</strong></li>
+          <li>Formulaire de <strong>commande</strong></li>
+          <li>Galerie photos <strong>professionnelle</strong></li>
+          <li>Partage facile sur <strong>réseaux sociaux</strong></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Plateforme mise en relation -->
+    <div class="service-card">
+      <span class="s-icon">🔗</span>
+      <div class="s-num">03</div>
+      <div class="s-tag" style="color:var(--pink);">Ambitieux</div>
+      <h2>Plateforme de Mise en Relation</h2>
+      <p>Vous avez une idée de marketplace — un site où deux groupes se rencontrent. Artisans et clients. Employeurs et candidats. Vendeurs et acheteurs. Je construis l'infrastructure complète : inscriptions, profils, recherche, contact.</p>
+      <div class="use-cases">
+        <span class="use-case">Marketplaces</span>
+        <span class="use-case">Annuaires</span>
+        <span class="use-case">Emploi</span>
+        <span class="use-case">Réservations</span>
+      </div>
+      <div class="s-includes">
+        <div class="s-includes-label">// Ce qui est inclus</div>
+        <ul>
+          <li>Système d'<strong>inscription</strong> et profils</li>
+          <li>Moteur de <strong>recherche</strong> et filtres</li>
+          <li>Base de données <strong>sécurisée</strong></li>
+          <li>Panel <strong>administrateur</strong></li>
+          <li>Géolocalisation et <strong>localisation</strong></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Application web -->
+    <div class="service-card">
+      <span class="s-icon">⚙️</span>
+      <div class="s-num">04</div>
+      <div class="s-tag" style="color:var(--gold);">Sur mesure</div>
+      <h2>Application Web Sur Mesure</h2>
+      <p>Vous avez un besoin très spécifique que les solutions standard ne couvrent pas. Gestion interne, tableau de bord, système de réservation, outil pour votre équipe. Je construis exactement ce dont vous avez besoin, rien de plus.</p>
+      <div class="use-cases">
+        <span class="use-case">Gestion stocks</span>
+        <span class="use-case">Tableaux de bord</span>
+        <span class="use-case">CRM</span>
+        <span class="use-case">Outils internes</span>
+      </div>
+      <div class="s-includes">
+        <div class="s-includes-label">// Ce qui est inclus</div>
+        <ul>
+          <li>Architecture <strong>sur mesure</strong></li>
+          <li>Backend <strong>Node.js</strong> + base de données</li>
+          <li>Interface <strong>admin</strong> complète</li>
+          <li>Intégration <strong>paiement mobile</strong> (MoMo)</li>
+          <li>Formation à <strong>l'utilisation</strong></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Mobile first — wide -->
+    <div class="service-card wide">
+      <span class="s-icon">📱</span>
+      <div class="s-num">05</div>
+      <div class="s-tag" style="color:var(--cyan);">Inclus dans tout</div>
+      <h2>Mobile-First — Optimisé Téléphone</h2>
+      <p style="max-width:600px;">Au Bénin, <strong style="color:var(--text);">plus de 90% des visiteurs</strong> arrivent sur votre site depuis leur téléphone. Pas leur ordinateur — leur téléphone. Un site qui ne s'affiche pas bien sur mobile, c'est comme une boutique avec une vitrine cassée. Je construis tous mes sites en pensant d'abord au mobile, avec des temps de chargement optimisés même sur une connexion lente.</p>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);margin-top:1.5rem;">
+        <div style="background:var(--darker);padding:1rem;text-align:center;">
+          <div style="font-family:'Share Tech Mono',monospace;font-size:1.4rem;color:var(--cyan);">90%</div>
+          <div style="font-size:0.78rem;color:var(--muted);margin-top:0.3rem;">Visiteurs sur mobile au Bénin</div>
+        </div>
+        <div style="background:var(--darker);padding:1rem;text-align:center;">
+          <div style="font-family:'Share Tech Mono',monospace;font-size:1.4rem;color:var(--indigo);">&lt;3s</div>
+          <div style="font-size:0.78rem;color:var(--muted);margin-top:0.3rem;">Temps de chargement cible</div>
+        </div>
+        <div style="background:var(--darker);padding:1rem;text-align:center;">
+          <div style="font-family:'Share Tech Mono',monospace;font-size:1.4rem;color:var(--pink);">100%</div>
+          <div style="font-size:0.78rem;color:var(--muted);margin-top:0.3rem;">Sites testés sur téléphone</div>
+        </div>
+        <div style="background:var(--darker);padding:1rem;text-align:center;">
+          <div style="font-family:'Share Tech Mono',monospace;font-size:1.4rem;color:var(--gold);">✓</div>
+          <div style="font-size:0.78rem;color:var(--muted);margin-top:0.3rem;">Compatible toutes connexions</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- PROCESSUS -->
+  <div class="process-section">
+    <div class="section-eyebrow">// Comment ça se passe</div>
+    <div class="section-title">De l'idée au site en ligne.</div>
+
+    <div class="process-steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <h3>On discute</h3>
+        <p>Vous me décrivez votre projet sur WhatsApp. Je pose quelques questions. On définit ensemble exactement ce dont vous avez besoin. Gratuit, sans engagement.</p>
+        <div class="step-connector"></div>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <h3>Je propose</h3>
+        <p>Je vous envoie un devis clair avec le prix exact, les fonctionnalités incluses et le délai de livraison. Aucune surprise cachée.</p>
+        <div class="step-connector"></div>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <h3>On démarre</h3>
+        <p>Vous payez 50% pour lancer le projet. Je commence à construire. Je vous montre l'avancement régulièrement sur WhatsApp.</p>
+        <div class="step-connector"></div>
+      </div>
+      <div class="step">
+        <div class="step-num">04</div>
+        <h3>Vous recevez</h3>
+        <p>Je livre le site. Vous vérifiez, on ajuste si besoin. Quand vous êtes satisfait, vous payez le reste. Votre site est en ligne.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- POURQUOI MOI -->
+  <div class="why-section">
+    <div class="section-eyebrow">// Pourquoi me choisir</div>
+    <div class="section-title">Ce qui me différencie.</div>
+    <div class="why-grid">
+      <div class="why-card">
+        <div class="why-icon">🌍</div>
+        <div class="why-title">Je connais votre marché</div>
+        <div class="why-desc">Je suis Béninois, je vis à Cotonou, je comprends les besoins locaux. Pas un développeur étranger qui ne connaît pas le contexte.</div>
+      </div>
+      <div class="why-card">
+        <div class="why-icon">🔒</div>
+        <div class="why-title">Formation réseau & sécurité</div>
+        <div class="why-desc">Ma formation en réseaux et sécurité me donne une vision que peu de devs web ont. Vos données et celles de vos clients sont protégées.</div>
+      </div>
+      <div class="why-card">
+        <div class="why-icon">💬</div>
+        <div class="why-title">Tout sur WhatsApp</div>
+        <div class="why-desc">Pas de formulaires compliqués, pas de réunions. On communique sur WhatsApp comme des humains. Réponse dans la journée.</div>
+      </div>
+      <div class="why-card">
+        <div class="why-icon">⚡</div>
+        <div class="why-title">Livraison en 7 jours</div>
+        <div class="why-desc">Pas de mois d'attente. Un site vitrine est livré en 5 à 7 jours. Les projets complexes dans un délai convenu à l'avance.</div>
+      </div>
+      <div class="why-card">
+        <div class="why-icon">💰</div>
+        <div class="why-title">Tarifs honnêtes</div>
+        <div class="why-desc">Prix affichés clairement en FCFA, euros et dollars. Pas de surprise en cours de route. Paiement en 2 fois pour votre tranquillité.</div>
+      </div>
+      <div class="why-card">
+        <div class="why-icon">🎓</div>
+        <div class="why-title">Tarif étudiant</div>
+        <div class="why-desc">Un tarif solidaire pour les étudiants qui veulent se lancer sans avoir les moyens. Sur présentation de carte d'étudiant valide.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-section">
+    <div class="cta-text">
+      <h3>Prêt à démarrer votre projet ?</h3>
+      <p>Décrivez-moi votre idée. Je vous réponds dans la journée avec un devis gratuit et honnête.</p>
+    </div>
+    <div class="cta-btns">
+      <a href="https://wa.me/2290199191971?text=Bonjour%20Wisdom,%20je%20veux%20discuter%20d'un%20projet%20web" class="btn btn-primary">Démarrer sur WhatsApp</a>
+      <a href="pricing.html" class="btn btn-outline">Voir les tarifs</a>
+    </div>
+  </div>
+
+</div>
+
+<footer>&lt; Wisdom Dev · Services · Cotonou, Bénin · 2025 /&gt;</footer>
+<a href="https://wa.me/2290199191971" class="wa-float">💬 +229 01 99 19 19 71</a>
+
+<script>
+const cursor=document.getElementById('cursor');
+const ring=document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cursor.style.left=mx+'px';cursor.style.top=my+'px';});
+function animRing(){rx+=(mx-rx)*.12;ry+=(my-ry)*.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(animRing);}
+animRing();
+document.querySelectorAll('a,button').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{cursor.style.width='16px';cursor.style.height='16px';cursor.style.background='#818cf8';ring.style.width='50px';ring.style.height='50px';ring.style.borderColor='#f472b6';});
+  el.addEventListener('mouseleave',()=>{cursor.style.width='10px';cursor.style.height='10px';cursor.style.background='#f472b6';ring.style.width='36px';ring.style.height='36px';ring.style.borderColor='#818cf8';});
+});
+
+const canvas=document.getElementById('binary');
+const ctx=canvas.getContext('2d');
+function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+resize();window.addEventListener('resize',resize);
+const fontSize=14;
+let cols,drops,dropColors,dropSpeeds,dropOpacities;
+function initDrops(){cols=Math.floor(canvas.width/fontSize);drops=Array(cols).fill(0).map(()=>Math.random()*-canvas.height/fontSize);dropColors=Array(cols).fill(0).map(()=>Math.random());dropSpeeds=Array(cols).fill(0).map(()=>.4+Math.random()*.8);dropOpacities=Array(cols).fill(0).map(()=>.5+Math.random()*.5);}
+initDrops();
+function draw(){
+  ctx.fillStyle='rgba(3,2,9,0.05)';ctx.fillRect(0,0,canvas.width,canvas.height);
+  for(let i=0;i<drops.length;i++){
+    const char=Math.random()>.5?'1':'0';const y=drops[i]*fontSize;
+    let r,g,b;
+    if(dropColors[i]<.33){r=129;g=140;b=248;}
+    else if(dropColors[i]<.66){r=244;g=114;b=182;}
+    else{r=0;g=212;b=255;}
+    const trailPos=drops[i]-Math.floor(drops[i]);
+    if(trailPos<.1){ctx.fillStyle='rgba(255,255,255,0.95)';}
+    else{ctx.fillStyle=`rgba(${r},${g},${b},${.35+dropOpacities[i]*.4})`;}
+    ctx.font=`bold ${fontSize}px 'Share Tech Mono',monospace`;
+    ctx.fillText(char,i*fontSize,y);
+    if(y>canvas.height&&Math.random()>.972){drops[i]=Math.random()*-30;dropColors[i]=Math.random();dropSpeeds[i]=.4+Math.random()*.8;dropOpacities[i]=.5+Math.random()*.5;}
+    drops[i]+=dropSpeeds[i];
+  }
+}
+setInterval(draw,45);
+</script>
+</body>
+</html>

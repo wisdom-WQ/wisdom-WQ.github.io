@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact — Wisdom Dev · Développeur Web Cotonou</title>
+<meta name="description" content="Contactez Wisdom Dev pour votre projet web. WhatsApp, email, devis gratuit. Réponse dans la journée. Cotonou, Bénin.">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+  :root{
+    --indigo:#818cf8;--purple:#c084fc;--pink:#f472b6;
+    --gold:#f7c97e;--cyan:#00d4ff;
+    --dark:#060412;--darker:#030209;
+    --text:#e8eeff;--muted:#4a4070;
+    --border:rgba(129,140,248,0.12);--surface:rgba(129,140,248,0.04);
+  }
+  html{scroll-behavior:smooth;}
+  body{background:var(--darker);color:var(--text);font-family:'Rajdhani',sans-serif;font-size:17px;line-height:1.7;overflow-x:hidden;cursor:none;}
+
+  .cursor{position:fixed;width:10px;height:10px;background:var(--pink);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .2s,height .2s,background .2s;mix-blend-mode:screen;}
+  .cursor-ring{position:fixed;width:36px;height:36px;border:1px solid var(--indigo);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:all .12s ease;mix-blend-mode:screen;}
+
+  canvas#binary{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:0.35;}
+  .vignette{position:fixed;inset:0;background:radial-gradient(ellipse at 50% 30%,rgba(3,2,9,0.5) 0%,rgba(3,2,9,0.92) 70%);z-index:1;pointer-events:none;}
+
+  nav{position:fixed;top:0;width:100%;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:1.2rem 5%;background:rgba(3,2,9,0.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);}
+  .logo-svg{height:36px;}
+  nav ul{display:flex;gap:2rem;list-style:none;}
+  nav a{color:var(--muted);text-decoration:none;font-family:'Share Tech Mono',monospace;font-size:0.78rem;letter-spacing:3px;text-transform:uppercase;transition:color .3s;}
+  nav a:hover,nav a.active{color:var(--indigo);}
+  .nav-status{font-family:'Share Tech Mono',monospace;font-size:0.7rem;letter-spacing:2px;color:#4ade80;display:flex;align-items:center;gap:6px;}
+  .pulse{width:6px;height:6px;border-radius:50%;background:#4ade80;animation:pulse-anim 2s ease-in-out infinite;}
+  @keyframes pulse-anim{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
+
+  .page{position:relative;z-index:10;max-width:1100px;margin:0 auto;padding:8rem 5% 6rem;}
+
+  .eyebrow{font-family:'Share Tech Mono',monospace;font-size:0.72rem;letter-spacing:5px;color:var(--indigo);text-transform:uppercase;margin-bottom:1rem;display:flex;align-items:center;gap:12px;opacity:0;animation:fadeUp .8s ease forwards .2s;}
+  .eyebrow::before{content:'';width:30px;height:1px;background:linear-gradient(90deg,transparent,var(--indigo));}
+
+  h1{font-size:clamp(2.2rem,6vw,4rem);font-weight:700;line-height:1.1;letter-spacing:-1px;opacity:0;animation:fadeUp .8s ease forwards .35s;}
+  h1 .grad{background:linear-gradient(135deg,var(--indigo),var(--purple),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+
+  .page-intro{font-size:1.05rem;color:var(--muted);max-width:500px;margin-top:1rem;line-height:1.7;opacity:0;animation:fadeUp .8s ease forwards .5s;}
+
+  /* LAYOUT */
+  .contact-layout{display:grid;grid-template-columns:1fr 1.4fr;gap:1px;background:var(--border);margin-top:3rem;opacity:0;animation:fadeUp .8s ease forwards .65s;}
+
+  /* INFOS GAUCHE */
+  .contact-info{background:rgba(3,2,9,0.92);padding:2.5rem;}
+
+  .info-title{font-family:'Share Tech Mono',monospace;font-size:0.68rem;letter-spacing:4px;color:var(--indigo);text-transform:uppercase;margin-bottom:1.5rem;}
+
+  .contact-links{display:flex;flex-direction:column;gap:0;}
+
+  .contact-link{display:flex;align-items:center;gap:1.2rem;padding:1.2rem 0;border-bottom:1px solid var(--border);text-decoration:none;transition:all .25s;position:relative;overflow:hidden;}
+  .contact-link::before{content:'';position:absolute;left:0;top:0;width:2px;height:100%;background:linear-gradient(180deg,var(--indigo),var(--pink));transform:scaleY(0);transition:transform .3s;}
+  .contact-link:hover::before{transform:scaleY(1);}
+  .contact-link:hover{padding-left:12px;}
+
+  .link-icon{width:42px;height:42px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;border:1px solid var(--border);flex-shrink:0;transition:border-color .25s;}
+  .contact-link:hover .link-icon{border-color:var(--indigo);}
+
+  .link-content{}
+  .link-label{font-family:'Share Tech Mono',monospace;font-size:0.65rem;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-bottom:2px;}
+  .link-value{font-size:0.95rem;color:var(--text);font-weight:600;}
+  .link-sub{font-size:0.8rem;color:var(--muted);}
+
+  /* DISPO CARD */
+  .dispo-card{margin-top:2rem;padding:1.2rem;border:1px solid rgba(74,222,128,0.2);background:rgba(74,222,128,0.03);}
+  .dispo-title{font-family:'Share Tech Mono',monospace;font-size:0.65rem;letter-spacing:3px;color:#4ade80;text-transform:uppercase;margin-bottom:0.8rem;display:flex;align-items:center;gap:6px;}
+  .dispo-dot{width:6px;height:6px;border-radius:50%;background:#4ade80;animation:pulse-anim 1.5s ease-in-out infinite;}
+  .dispo-item{display:flex;justify-content:space-between;align-items:center;padding:0.4rem 0;border-bottom:1px solid rgba(74,222,128,0.08);font-size:0.88rem;}
+  .dispo-item:last-child{border-bottom:none;}
+  .dispo-key{color:var(--muted);}
+  .dispo-val{color:var(--text);font-weight:600;font-family:'Share Tech Mono',monospace;font-size:0.8rem;}
+  .dispo-val.green{color:#4ade80;}
+  .dispo-val.gold{color:var(--gold);}
+
+  /* FORMULAIRE DROITE */
+  .contact-form-wrap{background:rgba(3,2,9,0.92);padding:2.5rem;}
+
+  .form-title{font-family:'Share Tech Mono',monospace;font-size:0.68rem;letter-spacing:4px;color:var(--indigo);text-transform:uppercase;margin-bottom:1.8rem;}
+
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;}
+  .form-field{display:flex;flex-direction:column;gap:0.4rem;}
+  .form-field label{font-family:'Share Tech Mono',monospace;font-size:0.62rem;letter-spacing:3px;color:var(--muted);text-transform:uppercase;}
+  .form-field input,.form-field textarea,.form-field select{
+    background:rgba(129,140,248,0.04);
+    border:1px solid var(--border);
+    color:var(--text);padding:0.85rem 1rem;
+    font-family:'Rajdhani',sans-serif;font-size:1rem;
+    outline:none;transition:border-color .3s;resize:none;
+    width:100%;
+  }
+  .form-field input:focus,.form-field textarea:focus,.form-field select:focus{border-color:var(--indigo);}
+  .form-field select option{background:var(--darker);}
+
+  /* TYPE DE PROJET BUTTONS */
+  .type-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:0.5rem;margin-top:0.3rem;}
+  .type-btn{padding:0.6rem 0.8rem;background:var(--surface);border:1px solid var(--border);color:var(--muted);font-family:'Share Tech Mono',monospace;font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;cursor:none;transition:all .2s;text-align:center;}
+  .type-btn:hover,.type-btn.selected{background:rgba(129,140,248,0.1);border-color:var(--indigo);color:var(--indigo);}
+
+  /* BUDGET */
+  .budget-options{display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:0.3rem;}
+  .budget-btn{padding:0.5rem 1rem;background:var(--surface);border:1px solid var(--border);color:var(--muted);font-family:'Share Tech Mono',monospace;font-size:0.65rem;letter-spacing:1px;cursor:none;transition:all .2s;}
+  .budget-btn:hover,.budget-btn.selected{background:rgba(247,201,126,0.08);border-color:var(--gold);color:var(--gold);}
+
+  .submit-btn{width:100%;margin-top:1.5rem;padding:1rem;background:linear-gradient(135deg,var(--indigo),var(--pink));color:#fff;border:none;font-family:'Rajdhani',sans-serif;font-size:1.05rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:none;transition:opacity .3s;position:relative;overflow:hidden;}
+  .submit-btn::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--pink),var(--indigo));opacity:0;transition:opacity .3s;}
+  .submit-btn:hover::after{opacity:1;}
+  .submit-btn span{position:relative;z-index:1;}
+
+  .form-note{font-size:0.82rem;color:var(--muted);margin-top:0.8rem;text-align:center;}
+  .form-success{display:none;text-align:center;padding:3rem 1rem;}
+  .success-icon{font-size:3rem;margin-bottom:1rem;}
+  .success-title{font-family:'Share Tech Mono',monospace;font-size:0.8rem;letter-spacing:3px;color:#4ade80;text-transform:uppercase;margin-bottom:0.5rem;}
+  .success-text{font-size:0.95rem;color:var(--muted);line-height:1.7;}
+
+  /* SECTION ALTERNATIVE WA */
+  .wa-section{margin-top:3rem;padding:2rem;border:1px solid rgba(244,114,182,0.2);background:rgba(244,114,182,0.03);display:flex;align-items:center;justify-content:space-between;gap:2rem;flex-wrap:wrap;opacity:0;animation:fadeUp .8s ease forwards .9s;}
+  .wa-text h3{font-size:1.2rem;font-weight:700;color:var(--text);margin-bottom:0.3rem;}
+  .wa-text p{font-size:0.9rem;color:var(--muted);}
+  .wa-btn{display:inline-flex;align-items:center;gap:8px;padding:.85rem 2rem;background:linear-gradient(135deg,var(--indigo),var(--pink));color:#fff;text-decoration:none;font-family:'Rajdhani',sans-serif;font-size:1rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;white-space:nowrap;transition:box-shadow .3s;}
+  .wa-btn:hover{box-shadow:0 0 30px rgba(244,114,182,0.4);}
+
+  footer{position:relative;z-index:10;text-align:center;padding:2rem;border-top:1px solid var(--border);font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--muted);letter-spacing:3px;}
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+
+  @media(max-width:768px){
+    nav ul{display:none;}
+    body{cursor:auto;}
+    .cursor,.cursor-ring{display:none;}
+    .page{padding:7rem 5% 4rem;}
+    .contact-layout{grid-template-columns:1fr;}
+    .form-grid{grid-template-columns:1fr;}
+    .wa-section{flex-direction:column;}
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursor-ring"></div>
+<canvas id="binary"></canvas>
+<div class="vignette"></div>
+
+<nav>
+  <a href="index.html">
+    <svg class="logo-svg" viewBox="0 0 220 40" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="ng" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#818cf8"/><stop offset="100%" stop-color="#f472b6"/></linearGradient>
+        <linearGradient id="nd" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#f7c97e"/><stop offset="100%" stop-color="#f472b6"/></linearGradient>
+      </defs>
+      <rect x="0" y="4" width="4" height="32" rx="2" fill="url(#ng)"/>
+      <text x="12" y="20" font-family="Courier New,monospace" font-size="13" font-weight="700" fill="#e8eeff" letter-spacing="1">WISDOM</text>
+      <text x="12" y="35" font-family="Courier New,monospace" font-size="13" font-weight="700" fill="url(#nd)" letter-spacing="1">DEV</text>
+    </svg>
+  </a>
+  <ul>
+    <li><a href="services.html">Services</a></li>
+    <li><a href="pricing.html">Tarifs</a></li>
+    <li><a href="projects.html">Projets</a></li>
+    <li><a href="about.html">À propos</a></li>
+    <li><a href="contact.html" class="active">Contact</a></li>
+  </ul>
+  <div class="nav-status"><div class="pulse"></div>DISPONIBLE</div>
+</nav>
+
+<div class="page">
+
+  <div class="eyebrow">// 05 · Contact</div>
+  <h1>Parlons de votre <span class="grad">projet.</span></h1>
+  <p class="page-intro">Un projet en tête ? Une question ? Décrivez-moi ce que vous voulez construire. Je vous réponds dans la journée avec un devis gratuit et honnête.</p>
+
+  <div class="contact-layout">
+
+    <!-- INFOS GAUCHE -->
+    <div class="contact-info">
+      <div class="info-title">// Me joindre directement</div>
+
+      <div class="contact-links">
+
+        <a href="https://wa.me/2290199191971" class="contact-link">
+          <div class="link-icon">💬</div>
+          <div class="link-content">
+            <div class="link-label">WhatsApp</div>
+            <div class="link-value">+229 01 99 19 19 71</div>
+            <div class="link-sub">Réponse garantie dans la journée</div>
+          </div>
+        </a>
+
+        <a href="mailto:merveilwisdom1@gmail.com" class="contact-link">
+          <div class="link-icon">✉️</div>
+          <div class="link-content">
+            <div class="link-label">Email</div>
+            <div class="link-value">merveilwisdom1@gmail.com</div>
+            <div class="link-sub">Pour les devis détaillés</div>
+          </div>
+        </a>
+
+        <a href="https://github.com/wisdom-WQ" target="_blank" class="contact-link">
+          <div class="link-icon">⌨️</div>
+          <div class="link-content">
+            <div class="link-label">GitHub</div>
+            <div class="link-value">github.com/wisdom-WQ</div>
+            <div class="link-sub">Voir mon code source</div>
+          </div>
+        </a>
+
+        <div class="contact-link" style="cursor:default;">
+          <div class="link-icon">📍</div>
+          <div class="link-content">
+            <div class="link-label">Localisation</div>
+            <div class="link-value">Cotonou, Bénin</div>
+            <div class="link-sub">100% disponible à distance</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- DISPONIBILITÉ -->
+      <div class="dispo-card">
+        <div class="dispo-title"><div class="dispo-dot"></div>Disponibilité actuelle</div>
+        <div class="dispo-item">
+          <span class="dispo-key">Statut</span>
+          <span class="dispo-val green">Disponible</span>
+        </div>
+        <div class="dispo-item">
+          <span class="dispo-key">Prochain créneau</span>
+          <span class="dispo-val green">Maintenant</span>
+        </div>
+        <div class="dispo-item">
+          <span class="dispo-key">Délai de réponse</span>
+          <span class="dispo-val">Moins de 24h</span>
+        </div>
+        <div class="dispo-item">
+          <span class="dispo-key">Devis</span>
+          <span class="dispo-val gold">Gratuit</span>
+        </div>
+        <div class="dispo-item">
+          <span class="dispo-key">Places ce mois</span>
+          <span class="dispo-val gold">2 disponibles</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- FORMULAIRE DROITE -->
+    <div class="contact-form-wrap">
+      <div class="form-title">// Décrivez votre projet</div>
+
+      <div id="contact-form">
+        <div class="form-grid">
+          <div class="form-field">
+            <label>Votre nom *</label>
+            <input type="text" id="f-nom" placeholder="Jean Koffi">
+          </div>
+          <div class="form-field">
+            <label>WhatsApp / Email *</label>
+            <input type="text" id="f-contact" placeholder="+229 ... ou email@...">
+          </div>
+        </div>
+
+        <div class="form-field" style="margin-bottom:1rem;">
+          <label>Type de projet</label>
+          <div class="type-grid" id="type-grid">
+            <button class="type-btn" onclick="selectType(this)">🏪 Site vitrine</button>
+            <button class="type-btn" onclick="selectType(this)">🛒 Catalogue / boutique</button>
+            <button class="type-btn" onclick="selectType(this)">🔗 Marketplace</button>
+            <button class="type-btn" onclick="selectType(this)">⚙️ App sur mesure</button>
+          </div>
+        </div>
+
+        <div class="form-field" style="margin-bottom:1rem;">
+          <label>Budget envisagé</label>
+          <div class="budget-options" id="budget-opts">
+            <button class="budget-btn" onclick="selectBudget(this)">45 000 FCFA</button>
+            <button class="budget-btn" onclick="selectBudget(this)">80 000 FCFA</button>
+            <button class="budget-btn" onclick="selectBudget(this)">150 000+ FCFA</button>
+            <button class="budget-btn" onclick="selectBudget(this)">Je ne sais pas</button>
+          </div>
+        </div>
+
+        <div class="form-field" style="margin-bottom:0;">
+          <label>Décrivez votre projet *</label>
+          <textarea id="f-msg" rows="5" placeholder="Exemple : Je veux un site pour ma pharmacie à Akpakpa. J'ai besoin d'afficher mes horaires, mes médicaments disponibles et permettre aux clients de me contacter facilement..."></textarea>
+        </div>
+
+        <button class="submit-btn" onclick="submitForm()">
+          <span>Envoyer ma demande →</span>
+        </button>
+        <p class="form-note">Réponse garantie sous 24h · Devis gratuit · Sans engagement</p>
+      </div>
+
+      <div class="form-success" id="form-success">
+        <div class="success-icon">✅</div>
+        <div class="success-title">Message reçu !</div>
+        <div class="success-text">
+          Merci pour votre confiance.<br>
+          Je vous réponds <strong style="color:var(--text)">dans les 24 heures</strong> avec un devis personnalisé.<br><br>
+          En attendant, vous pouvez me contacter directement sur WhatsApp pour aller plus vite.
+        </div>
+        <a href="https://wa.me/2290199191971" style="display:inline-block;margin-top:1.5rem;padding:.85rem 2rem;background:linear-gradient(135deg,var(--indigo),var(--pink));color:#fff;text-decoration:none;font-family:'Rajdhani',sans-serif;font-weight:700;letter-spacing:2px;text-transform:uppercase;">Ouvrir WhatsApp</a>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- WHATSAPP DIRECT -->
+  <div class="wa-section">
+    <div class="wa-text">
+      <h3>Vous préférez parler directement ?</h3>
+      <p>WhatsApp c'est plus rapide. Décrivez-moi votre idée en un message — je vous réponds immédiatement.</p>
+    </div>
+    <a href="https://wa.me/2290199191971?text=Bonjour%20Wisdom,%20j'ai%20un%20projet%20web%20à%20vous%20soumettre." class="wa-btn">
+      💬 Ouvrir WhatsApp maintenant
+    </a>
+  </div>
+
+</div>
+
+<footer>&lt; Wisdom Dev · Contact · Cotonou, Bénin · 2025 /&gt;</footer>
+
+<script>
+const cursor=document.getElementById('cursor');
+const ring=document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cursor.style.left=mx+'px';cursor.style.top=my+'px';});
+function animRing(){rx+=(mx-rx)*.12;ry+=(my-ry)*.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(animRing);}
+animRing();
+document.querySelectorAll('a,button').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{cursor.style.width='16px';cursor.style.height='16px';cursor.style.background='#818cf8';ring.style.width='50px';ring.style.height='50px';ring.style.borderColor='#f472b6';});
+  el.addEventListener('mouseleave',()=>{cursor.style.width='10px';cursor.style.height='10px';cursor.style.background='#f472b6';ring.style.width='36px';ring.style.height='36px';ring.style.borderColor='#818cf8';});
+});
+
+// BINARY
+const canvas=document.getElementById('binary');
+const ctx=canvas.getContext('2d');
+function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+resize();window.addEventListener('resize',resize);
+const fontSize=14;
+let cols,drops,dropColors,dropSpeeds,dropOpacities;
+function initDrops(){cols=Math.floor(canvas.width/fontSize);drops=Array(cols).fill(0).map(()=>Math.random()*-canvas.height/fontSize);dropColors=Array(cols).fill(0).map(()=>Math.random());dropSpeeds=Array(cols).fill(0).map(()=>.4+Math.random()*.8);dropOpacities=Array(cols).fill(0).map(()=>.5+Math.random()*.5);}
+initDrops();
+function draw(){
+  ctx.fillStyle='rgba(3,2,9,0.05)';ctx.fillRect(0,0,canvas.width,canvas.height);
+  for(let i=0;i<drops.length;i++){
+    const char=Math.random()>.5?'1':'0';const y=drops[i]*fontSize;
+    let r,g,b;
+    if(dropColors[i]<.33){r=129;g=140;b=248;}
+    else if(dropColors[i]<.66){r=244;g=114;b=182;}
+    else{r=0;g=212;b=255;}
+    const trailPos=drops[i]-Math.floor(drops[i]);
+    if(trailPos<.1){ctx.fillStyle='rgba(255,255,255,0.95)';}
+    else{ctx.fillStyle=`rgba(${r},${g},${b},${.35+dropOpacities[i]*.4})`;}
+    ctx.font=`bold ${fontSize}px 'Share Tech Mono',monospace`;
+    ctx.fillText(char,i*fontSize,y);
+    if(y>canvas.height&&Math.random()>.972){drops[i]=Math.random()*-30;dropColors[i]=Math.random();dropSpeeds[i]=.4+Math.random()*.8;dropOpacities[i]=.5+Math.random()*.5;}
+    drops[i]+=dropSpeeds[i];
+  }
+}
+setInterval(draw,45);
+
+// TYPE PROJET
+function selectType(btn){
+  document.querySelectorAll('.type-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+// BUDGET
+function selectBudget(btn){
+  document.querySelectorAll('.budget-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+// SUBMIT
+function submitForm(){
+  const nom=document.getElementById('f-nom').value.trim();
+  const contact=document.getElementById('f-contact').value.trim();
+  const msg=document.getElementById('f-msg').value.trim();
+  if(!nom||!contact||!msg){
+    alert('Remplissez au minimum votre nom, votre contact et la description de votre projet.');
+    return;
+  }
+  document.getElementById('contact-form').style.display='none';
+  document.getElementById('form-success').style.display='block';
+}
+</script>
+</body>
+</html>
