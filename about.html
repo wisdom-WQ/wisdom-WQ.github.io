@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>À propos — Wisdom Dev · Développeur Web Cotonou</title>
+<meta name="description" content="Houngbedji Wisdom Merveil — étudiant en réseaux et sécurité à Cotonou. Développeur fullstack, 4 projets déployés en 7 mois.">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+  :root{
+    --indigo:#818cf8;--purple:#c084fc;--pink:#f472b6;
+    --gold:#f7c97e;--cyan:#00d4ff;
+    --dark:#060412;--darker:#030209;
+    --text:#e8eeff;--muted:#4a4070;
+    --border:rgba(129,140,248,0.12);--surface:rgba(129,140,248,0.04);
+  }
+  html{scroll-behavior:smooth;}
+  body{background:var(--darker);color:var(--text);font-family:'Rajdhani',sans-serif;font-size:17px;line-height:1.7;overflow-x:hidden;cursor:none;}
+
+  .cursor{position:fixed;width:10px;height:10px;background:var(--pink);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .2s,height .2s,background .2s;mix-blend-mode:screen;}
+  .cursor-ring{position:fixed;width:36px;height:36px;border:1px solid var(--indigo);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:all .12s ease;mix-blend-mode:screen;}
+
+  canvas#binary{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:0.35;}
+  .vignette{position:fixed;inset:0;background:radial-gradient(ellipse at 50% 30%,rgba(3,2,9,0.5) 0%,rgba(3,2,9,0.92) 70%);z-index:1;pointer-events:none;}
+
+  nav{position:fixed;top:0;width:100%;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:1.2rem 5%;background:rgba(3,2,9,0.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);}
+  .logo-svg{height:36px;}
+  nav ul{display:flex;gap:2rem;list-style:none;}
+  nav a{color:var(--muted);text-decoration:none;font-family:'Share Tech Mono',monospace;font-size:0.78rem;letter-spacing:3px;text-transform:uppercase;transition:color .3s;}
+  nav a:hover,nav a.active{color:var(--indigo);}
+  .nav-status{font-family:'Share Tech Mono',monospace;font-size:0.7rem;letter-spacing:2px;color:#4ade80;display:flex;align-items:center;gap:6px;}
+  .pulse{width:6px;height:6px;border-radius:50%;background:#4ade80;animation:pulse-anim 2s ease-in-out infinite;}
+  @keyframes pulse-anim{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
+
+  .page{position:relative;z-index:10;max-width:1100px;margin:0 auto;padding:8rem 5% 6rem;}
+
+  .eyebrow{font-family:'Share Tech Mono',monospace;font-size:0.72rem;letter-spacing:5px;color:var(--indigo);text-transform:uppercase;margin-bottom:1rem;display:flex;align-items:center;gap:12px;opacity:0;animation:fadeUp .8s ease forwards .2s;}
+  .eyebrow::before{content:'';width:30px;height:1px;background:linear-gradient(90deg,transparent,var(--indigo));}
+
+  h1{font-size:clamp(2.2rem,6vw,4rem);font-weight:700;line-height:1.1;letter-spacing:-1px;opacity:0;animation:fadeUp .8s ease forwards .35s;}
+  h1 .grad{background:linear-gradient(135deg,var(--indigo),var(--purple),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+
+  /* INTRO LAYOUT */
+  .intro-layout{display:grid;grid-template-columns:1fr 1.2fr;gap:1px;background:var(--border);margin-top:3rem;opacity:0;animation:fadeUp .8s ease forwards .5s;}
+
+  .intro-left{background:rgba(3,2,9,0.92);padding:2.5rem;}
+  .intro-right{background:rgba(3,2,9,0.92);padding:2.5rem;}
+
+  /* IDENTITÉ */
+  .identity-block{margin-bottom:2rem;}
+  .id-label{font-family:'Share Tech Mono',monospace;font-size:0.65rem;letter-spacing:4px;color:var(--indigo);text-transform:uppercase;margin-bottom:1.2rem;}
+  .id-name{font-size:1.6rem;font-weight:700;color:var(--text);line-height:1.2;margin-bottom:0.4rem;}
+  .id-role{font-size:0.95rem;color:var(--muted);margin-bottom:1.2rem;}
+
+  .id-tags{display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:1.5rem;}
+  .id-tag{font-family:'Share Tech Mono',monospace;font-size:0.65rem;padding:0.3rem 0.8rem;border:1px solid var(--border);color:var(--muted);letter-spacing:1px;transition:all .2s;}
+  .id-tag:hover{border-color:var(--indigo);color:var(--indigo);}
+
+  .id-bio{font-size:0.95rem;color:var(--muted);line-height:1.8;}
+  .id-bio strong{color:var(--text);}
+
+  /* STATS */
+  .stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--border);margin-top:1.5rem;}
+  .stat-box{background:rgba(3,2,9,0.95);padding:1.2rem;text-align:center;}
+  .stat-num{font-family:'Share Tech Mono',monospace;font-size:1.8rem;line-height:1;background:linear-gradient(135deg,var(--indigo),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+  .stat-label{font-size:0.78rem;color:var(--muted);margin-top:0.3rem;letter-spacing:1px;}
+
+  /* TIMELINE */
+  .timeline-label{font-family:'Share Tech Mono',monospace;font-size:0.65rem;letter-spacing:4px;color:var(--indigo);text-transform:uppercase;margin-bottom:1.5rem;}
+  .timeline{position:relative;padding-left:1.5rem;}
+  .timeline::before{content:'';position:absolute;left:0;top:0;width:1px;height:100%;background:linear-gradient(180deg,var(--indigo),var(--pink),transparent);}
+  .tl-item{position:relative;margin-bottom:1.8rem;}
+  .tl-item::before{content:'';position:absolute;left:-1.8rem;top:0.4rem;width:8px;height:8px;border-radius:50%;background:var(--indigo);border:2px solid var(--darker);}
+  .tl-item:last-child{margin-bottom:0;}
+  .tl-date{font-family:'Share Tech Mono',monospace;font-size:0.65rem;letter-spacing:2px;color:var(--indigo);margin-bottom:0.3rem;}
+  .tl-title{font-size:1rem;font-weight:700;color:var(--text);margin-bottom:0.2rem;}
+  .tl-desc{font-size:0.88rem;color:var(--muted);line-height:1.6;}
+  .tl-badge{display:inline-block;font-family:'Share Tech Mono',monospace;font-size:0.6rem;padding:0.15rem 0.6rem;margin-top:0.4rem;letter-spacing:1px;}
+  .tl-badge.live{border:1px solid rgba(74,222,128,0.3);color:#4ade80;}
+  .tl-badge.dev{border:1px solid rgba(247,201,126,0.3);color:var(--gold);}
+  .tl-badge.study{border:1px solid var(--border);color:var(--muted);}
+
+  /* COMPÉTENCES */
+  .skills-section{margin-top:4rem;opacity:0;animation:fadeUp .8s ease forwards .7s;}
+  .section-eyebrow{font-family:'Share Tech Mono',monospace;font-size:0.68rem;letter-spacing:5px;color:var(--indigo);text-transform:uppercase;margin-bottom:0.8rem;display:flex;align-items:center;gap:12px;}
+  .section-eyebrow::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--border),transparent);}
+  .section-title{font-size:1.8rem;font-weight:700;color:var(--text);margin-bottom:2rem;}
+
+  .skills-layout{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);}
+  .skills-col{background:rgba(3,2,9,0.92);padding:2rem;}
+  .skills-col-title{font-family:'Share Tech Mono',monospace;font-size:0.68rem;letter-spacing:3px;color:var(--purple);text-transform:uppercase;margin-bottom:1.2rem;}
+
+  .skill-item{margin-bottom:1.2rem;}
+  .skill-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem;}
+  .skill-name{font-size:0.95rem;font-weight:600;color:var(--text);}
+  .skill-level{font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--muted);letter-spacing:1px;}
+  .skill-bar{height:3px;background:rgba(129,140,248,0.1);border-radius:99px;overflow:hidden;}
+  .skill-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--indigo),var(--pink));transition:width 1.5s ease;}
+
+  /* VALEURS */
+  .values-section{margin-top:4rem;opacity:0;animation:fadeUp .8s ease forwards .9s;}
+  .values-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);}
+  .value-card{background:rgba(3,2,9,0.92);padding:1.8rem;transition:background .3s;}
+  .value-card:hover{background:rgba(129,140,248,0.05);}
+  .value-icon{font-size:1.6rem;margin-bottom:0.8rem;}
+  .value-title{font-size:1rem;font-weight:700;color:var(--text);margin-bottom:0.4rem;}
+  .value-desc{font-size:0.88rem;color:var(--muted);line-height:1.6;}
+
+  /* CITATION */
+  .quote-section{margin-top:4rem;padding:2.5rem;border-left:3px solid var(--indigo);background:rgba(129,140,248,0.04);opacity:0;animation:fadeUp .8s ease forwards 1.1s;}
+  .quote-text{font-size:1.2rem;color:var(--text);line-height:1.8;font-style:italic;margin-bottom:1rem;}
+  .quote-author{font-family:'Share Tech Mono',monospace;font-size:0.7rem;letter-spacing:3px;color:var(--indigo);}
+
+  /* CTA */
+  .cta-row{display:flex;gap:1rem;flex-wrap:wrap;margin-top:3rem;opacity:0;animation:fadeUp .8s ease forwards 1.3s;}
+  .btn{padding:.85rem 2rem;font-family:'Rajdhani',sans-serif;font-size:1rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;text-decoration:none;cursor:none;transition:all .3s;display:inline-block;}
+  .btn-primary{background:linear-gradient(135deg,var(--indigo),var(--pink));color:#fff;border:none;}
+  .btn-outline{border:1px solid var(--indigo);color:var(--indigo);background:transparent;}
+  .btn-outline:hover{background:rgba(129,140,248,0.08);}
+  .btn-ghost{border:1px solid var(--border);color:var(--muted);background:transparent;}
+  .btn-ghost:hover{border-color:var(--indigo);color:var(--indigo);}
+
+  footer{position:relative;z-index:10;text-align:center;padding:2rem;border-top:1px solid var(--border);font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--muted);letter-spacing:3px;}
+  .wa-float{position:fixed;bottom:2rem;right:2rem;z-index:200;display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--indigo),var(--pink));padding:.75rem 1.4rem;text-decoration:none;color:#fff;font-family:'Share Tech Mono',monospace;font-size:.72rem;letter-spacing:2px;box-shadow:0 0 30px rgba(244,114,182,.3);transition:box-shadow .3s;}
+  .wa-float:hover{box-shadow:0 0 50px rgba(244,114,182,.5);}
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+
+  @media(max-width:768px){
+    nav ul{display:none;}
+    body{cursor:auto;}
+    .cursor,.cursor-ring{display:none;}
+    .page{padding:7rem 5% 4rem;}
+    .intro-layout{grid-template-columns:1fr;}
+    .skills-layout{grid-template-columns:1fr;}
+    .values-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursor-ring"></div>
+<canvas id="binary"></canvas>
+<div class="vignette"></div>
+
+<nav>
+  <a href="index.html">
+    <svg class="logo-svg" viewBox="0 0 220 40" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="ng" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#818cf8"/><stop offset="100%" stop-color="#f472b6"/></linearGradient>
+        <linearGradient id="nd" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#f7c97e"/><stop offset="100%" stop-color="#f472b6"/></linearGradient>
+      </defs>
+      <rect x="0" y="4" width="4" height="32" rx="2" fill="url(#ng)"/>
+      <text x="12" y="20" font-family="Courier New,monospace" font-size="13" font-weight="700" fill="#e8eeff" letter-spacing="1">WISDOM</text>
+      <text x="12" y="35" font-family="Courier New,monospace" font-size="13" font-weight="700" fill="url(#nd)" letter-spacing="1">DEV</text>
+    </svg>
+  </a>
+  <ul>
+    <li><a href="services.html">Services</a></li>
+    <li><a href="pricing.html">Tarifs</a></li>
+    <li><a href="projects.html">Projets</a></li>
+    <li><a href="about.html" class="active">À propos</a></li>
+    <li><a href="contact.html">Contact</a></li>
+  </ul>
+  <div class="nav-status"><div class="pulse"></div>DISPONIBLE</div>
+</nav>
+
+<div class="page">
+
+  <div class="eyebrow">// 04 · À propos</div>
+  <h1>Qui je <span class="grad">suis.</span></h1>
+
+  <!-- INTRO -->
+  <div class="intro-layout">
+
+    <!-- GAUCHE — Identité -->
+    <div class="intro-left">
+      <div class="identity-block">
+        <div class="id-label">// Identité</div>
+        <div class="id-name">Houngbedji Wisdom Merveil</div>
+        <div class="id-role">Développeur Web Fullstack · Étudiant Réseaux & Sécurité</div>
+        <div class="id-tags">
+          <span class="id-tag">Cotonou, Bénin</span>
+          <span class="id-tag">Fullstack</span>
+          <span class="id-tag">Node.js</span>
+          <span class="id-tag">Firebase</span>
+          <span class="id-tag">MongoDB</span>
+          <span class="id-tag">Réseaux TCP/IP</span>
+          <span class="id-tag">Sécurité API</span>
+        </div>
+        <div class="id-bio">
+          Je suis étudiant en <strong>Réseaux, Mobilité et Sécurité</strong> à Cotonou. En parallèle de ma formation, j'ai construit plusieurs plateformes fullstack réelles pour le marché africain.<br><br>
+          Ce qui me différencie des autres développeurs web ? <strong>Je viens du réseau.</strong> Je comprends comment les données circulent, comment les sécuriser, et comment construire des systèmes qui tiennent dans le temps — pas juste des sites qui font joli.<br><br>
+          Je suis béninois, je vis à Cotonou, je comprends les besoins locaux mieux que n'importe quel développeur étranger.
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-box">
+          <div class="stat-num">4</div>
+          <div class="stat-label">Projets déployés</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num">7</div>
+          <div class="stat-label">Mois de formation</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num">8</div>
+          <div class="stat-label">Pays couverts</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num">7j</div>
+          <div class="stat-label">Délai livraison</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DROITE — Timeline -->
+    <div class="intro-right">
+      <div class="timeline-label">// Mon parcours</div>
+      <div class="timeline">
+
+        <div class="tl-item">
+          <div class="tl-date">2024 — Début formation</div>
+          <div class="tl-title">Réseaux, Mobilité & Sécurité</div>
+          <div class="tl-desc">Démarrage de la formation technique à Cotonou. Apprentissage des fondamentaux réseau TCP/IP, sécurité des systèmes, et premiers pas en développement web.</div>
+          <span class="tl-badge study">Formation en cours</span>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-date">2024 — Projet 1</div>
+          <div class="tl-title">Afriwork — Plateforme d'emploi</div>
+          <div class="tl-desc">Premier grand projet fullstack. Backend Node.js + MongoDB, authentification JWT, déployé sur Railway. Couvre 8 pays de la zone FCFA.</div>
+          <span class="tl-badge live">Déployé</span>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-date">2024 — Projet 2</div>
+          <div class="tl-title">BéninEmploi — Emploi local</div>
+          <div class="tl-desc">Application web dédiée au marché béninois avec Firebase Auth et Firestore en temps réel. Interface mobile-first pensée pour la connexion locale.</div>
+          <span class="tl-badge live">Déployé</span>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-date">2025 — Projet 3</div>
+          <div class="tl-title">Trovex.bj — Artisans Bénin</div>
+          <div class="tl-desc">Marketplace connectant artisans du bâtiment et clients à Cotonou. Géolocalisation, multi-langue langues locales, intégration WhatsApp directe.</div>
+          <span class="tl-badge dev">En développement</span>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-date">2025 — Projet 4</div>
+          <div class="tl-title">BéninMarché — Marchés digitalisés</div>
+          <div class="tl-desc">Digitalisation des nouveaux marchés organisés du Bénin. Les vendeurs s'inscrivent par marché et catégorie. Les clients trouvent sans se déplacer à l'aveugle.</div>
+          <span class="tl-badge dev">En développement</span>
+        </div>
+
+        <div class="tl-item" style="opacity:0.5;">
+          <div class="tl-date">Bientôt</div>
+          <div class="tl-title">La suite...</div>
+          <div class="tl-desc">D'autres projets en cours de réflexion. Le terrain béninois a encore beaucoup de problèmes à résoudre.</div>
+          <span class="tl-badge dev">À venir</span>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- COMPÉTENCES -->
+  <div class="skills-section">
+    <div class="section-eyebrow">// Stack technique</div>
+    <div class="section-title">Ce que je maîtrise.</div>
+
+    <div class="skills-layout">
+      <div class="skills-col">
+        <div class="skills-col-title">// Frontend & Web</div>
+
+        <div class="skill-item">
+          <div class="skill-header"><span class="skill-name">HTML / CSS</span><span class="skill-level">Intermédiaire avancé · 75%</span></div>
+          <div class="skill-bar"><div class="skill-fill" style="width:75%"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-header"><span class="skill-name">JavaScript</span><span class="skill-level">Intermédiaire · 65%</span></div>
+          <div class="skill-bar"><div class="skill-fill" style="width:65%"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-header"><span class="skill-name">Design UI mobile-first</span><span class="skill-level">Intermédiaire · 70%</span></div>
+          <div class="skill-bar"><div class="skill-fill" style="width:70%"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-header"><span class="skill-name">Firebase Auth + Firestore</span><span class="skill-level">Intermédiaire · 68%</span></div>
+          <div class="skill-bar"><div class="skill-fill" style="width:68%"></div></div>
+        </div>
+      </div>
+
+      <div class="skills-col">
+        <div class="skills-col-title">// Backend & Réseau</div>
+
+        <div class="skill-item">
+          <div class="skill-header"><span class="skill-name">Node.js / Express</span><span class="skill-level">Intermédiaire · 70%</span></div>
+          <div class="skill-bar"><div class="skill-fill" style="width:70%"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-header"><span class="skill-name">MongoDB / Mongoose</span><span class="skill-level">Intermédiaire · 65%</span></div>
+          <div class="skill-bar"><div class="skill-fill" style="width:65%"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-header"><span class="skill-name">JWT / Sécurité API</span><span class="skill-level">Intermédiaire · 62%</span></div>
+          <div class="skill-bar"><div class="skill-fill" style="width:62%"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-header"><span class="skill-name">Réseaux TCP/IP</span><span class="skill-level">Intermédiaire · 70%</span></div>
+          <div class="skill-bar"><div class="skill-fill" style="width:70%"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VALEURS -->
+  <div class="values-section">
+    <div class="section-eyebrow">// Ce qui me guide</div>
+    <div class="section-title">Mes valeurs de travail.</div>
+    <div class="values-grid">
+      <div class="value-card">
+        <div class="value-icon">🎯</div>
+        <div class="value-title">Honnêteté d'abord</div>
+        <div class="value-desc">Je ne promets que ce que je peux livrer. Si votre projet dépasse mes compétences actuelles, je vous le dis. Pas de bluff, pas de promesses vides.</div>
+      </div>
+      <div class="value-card">
+        <div class="value-icon">⚡</div>
+        <div class="value-title">Action plutôt que perfection</div>
+        <div class="value-desc">Un site en ligne imparfait vaut mieux qu'un site parfait qui n'existe pas. On lance, on améliore. C'est comme ça que les grandes plateformes ont démarré.</div>
+      </div>
+      <div class="value-card">
+        <div class="value-icon">🌍</div>
+        <div class="value-title">Construire pour l'Afrique</div>
+        <div class="value-desc">Mes projets sont pensés pour le contexte local — connexions lentes, usage mobile dominant, langues locales, paiement mobile. Pas du copier-coller occidental.</div>
+      </div>
+      <div class="value-card">
+        <div class="value-icon">📚</div>
+        <div class="value-title">Apprendre en permanence</div>
+        <div class="value-desc">7 mois de formation et 4 projets déployés. L'apprentissage ne s'arrête jamais. Chaque projet enseigne quelque chose que le cours n'a pas couvert.</div>
+      </div>
+      <div class="value-card">
+        <div class="value-icon">🤝</div>
+        <div class="value-title">Solidarité entre étudiants</div>
+        <div class="value-desc">C'est dur de se lancer quand on n'a pas les moyens. Le tarif étudiant existe parce que quelqu'un aurait dû m'aider quand j'ai commencé. Je peux être cette personne.</div>
+      </div>
+      <div class="value-card">
+        <div class="value-icon">🔒</div>
+        <div class="value-title">Sécurité non négociable</div>
+        <div class="value-desc">Ma formation réseau n'est pas un détail. Vos données et celles de vos clients méritent d'être protégées. La sécurité est intégrée dès la conception, pas rajoutée après.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CITATION -->
+  <div class="quote-section">
+    <div class="quote-text">"Je ne construis pas des sites internet. Je construis des outils qui permettent aux gens de Cotonou et d'Afrique de trouver ce qu'ils cherchent, de vendre ce qu'ils ont, et de se faire connaître. Le code n'est que le moyen."</div>
+    <div class="quote-author">— WISDOM MERVEIL · WISDOM DEV · COTONOU, BÉNIN</div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-row">
+    <a href="contact.html" class="btn btn-primary">Démarrer un projet</a>
+    <a href="projects.html" class="btn btn-outline">Voir mes réalisations</a>
+    <a href="https://github.com/wisdom-WQ" target="_blank" class="btn btn-ghost">Mon GitHub</a>
+  </div>
+
+</div>
+
+<footer>&lt; Houngbedji Wisdom Merveil — Développeur Web · Cotonou, Bénin · 2025 /&gt;</footer>
+<a href="https://wa.me/2290199191971" class="wa-float">💬 +229 01 99 19 19 71</a>
+
+<script>
+const cursor=document.getElementById('cursor');
+const ring=document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cursor.style.left=mx+'px';cursor.style.top=my+'px';});
+function animRing(){rx+=(mx-rx)*.12;ry+=(my-ry)*.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(animRing);}
+animRing();
+document.querySelectorAll('a,button').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{cursor.style.width='16px';cursor.style.height='16px';cursor.style.background='#818cf8';ring.style.width='50px';ring.style.height='50px';ring.style.borderColor='#f472b6';});
+  el.addEventListener('mouseleave',()=>{cursor.style.width='10px';cursor.style.height='10px';cursor.style.background='#f472b6';ring.style.width='36px';ring.style.height='36px';ring.style.borderColor='#818cf8';});
+});
+
+const canvas=document.getElementById('binary');
+const ctx=canvas.getContext('2d');
+function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+resize();window.addEventListener('resize',resize);
+const fontSize=14;
+let cols,drops,dropColors,dropSpeeds,dropOpacities;
+function initDrops(){cols=Math.floor(canvas.width/fontSize);drops=Array(cols).fill(0).map(()=>Math.random()*-canvas.height/fontSize);dropColors=Array(cols).fill(0).map(()=>Math.random());dropSpeeds=Array(cols).fill(0).map(()=>.4+Math.random()*.8);dropOpacities=Array(cols).fill(0).map(()=>.5+Math.random()*.5);}
+initDrops();
+function draw(){
+  ctx.fillStyle='rgba(3,2,9,0.05)';ctx.fillRect(0,0,canvas.width,canvas.height);
+  for(let i=0;i<drops.length;i++){
+    const char=Math.random()>.5?'1':'0';const y=drops[i]*fontSize;
+    let r,g,b;
+    if(dropColors[i]<.33){r=129;g=140;b=248;}
+    else if(dropColors[i]<.66){r=244;g=114;b=182;}
+    else{r=0;g=212;b=255;}
+    const trailPos=drops[i]-Math.floor(drops[i]);
+    if(trailPos<.1){ctx.fillStyle='rgba(255,255,255,0.95)';}
+    else{ctx.fillStyle=`rgba(${r},${g},${b},${.35+dropOpacities[i]*.4})`;}
+    ctx.font=`bold ${fontSize}px 'Share Tech Mono',monospace`;
+    ctx.fillText(char,i*fontSize,y);
+    if(y>canvas.height&&Math.random()>.972){drops[i]=Math.random()*-30;dropColors[i]=Math.random();dropSpeeds[i]=.4+Math.random()*.8;dropOpacities[i]=.5+Math.random()*.5;}
+    drops[i]+=dropSpeeds[i];
+  }
+}
+setInterval(draw,45);
+</script>
+</body>
+</html>
