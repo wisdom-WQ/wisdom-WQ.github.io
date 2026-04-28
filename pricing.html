@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tarifs — Wisdom Dev · Développeur Web Cotonou</title>
+<meta name="description" content="Tarifs clairs en FCFA, euros et dollars. Sites vitrines à partir de 45 000 FCFA. Tarif étudiant disponible. Livraison en 7 jours.">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --indigo: #818cf8;
+    --purple: #c084fc;
+    --pink: #f472b6;
+    --gold: #f7c97e;
+    --cyan: #00d4ff;
+    --dark: #060412;
+    --darker: #030209;
+    --text: #e8eeff;
+    --muted: #4a4070;
+    --border: rgba(129,140,248,0.12);
+    --surface: rgba(129,140,248,0.04);
+  }
+
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--darker);
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 17px;
+    line-height: 1.7;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* CURSEUR */
+  .cursor { position:fixed;width:10px;height:10px;background:var(--pink);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .2s,height .2s,background .2s;mix-blend-mode:screen; }
+  .cursor-ring { position:fixed;width:36px;height:36px;border:1px solid var(--indigo);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:all .12s ease;mix-blend-mode:screen; }
+
+  /* CANVAS */
+  canvas#binary { position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none; }
+  .vignette { position:fixed;inset:0;background:radial-gradient(ellipse at 50% 40%,transparent 20%,rgba(3,2,9,0.88) 100%);z-index:1;pointer-events:none; }
+
+  /* NAV */
+  nav {
+    position:fixed;top:0;width:100%;z-index:100;
+    display:flex;justify-content:space-between;align-items:center;
+    padding:1.2rem 5%;
+    background:rgba(3,2,9,0.85);
+    backdrop-filter:blur(20px);
+    border-bottom:1px solid var(--border);
+  }
+  .logo-svg { height:36px; }
+  nav ul { display:flex;gap:2rem;list-style:none; }
+  nav a { color:var(--muted);text-decoration:none;font-family:'Share Tech Mono',monospace;font-size:0.78rem;letter-spacing:3px;text-transform:uppercase;transition:color .3s; }
+  nav a:hover, nav a.active { color:var(--indigo); }
+  .nav-status { font-family:'Share Tech Mono',monospace;font-size:0.7rem;letter-spacing:2px;color:#4ade80;display:flex;align-items:center;gap:6px; }
+  .pulse { width:6px;height:6px;border-radius:50%;background:#4ade80;animation:pulse-anim 2s ease-in-out infinite; }
+  @keyframes pulse-anim { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.8)} }
+
+  /* PAGE */
+  .page {
+    position:relative;z-index:10;
+    max-width:1100px;margin:0 auto;
+    padding:8rem 5% 6rem;
+  }
+
+  /* EYEBROW */
+  .eyebrow {
+    font-family:'Share Tech Mono',monospace;
+    font-size:0.72rem;letter-spacing:5px;color:var(--indigo);
+    text-transform:uppercase;margin-bottom:1rem;
+    display:flex;align-items:center;gap:12px;
+    opacity:0;animation:fadeUp .8s ease forwards .2s;
+  }
+  .eyebrow::before { content:'';width:30px;height:1px;background:linear-gradient(90deg,transparent,var(--indigo)); }
+
+  h1 {
+    font-size:clamp(2.2rem,6vw,4rem);font-weight:700;
+    line-height:1.1;letter-spacing:-1px;
+    opacity:0;animation:fadeUp .8s ease forwards .35s;
+  }
+  h1 .grad {
+    background:linear-gradient(135deg,var(--indigo),var(--purple),var(--pink));
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  }
+
+  .page-intro {
+    font-size:1.05rem;color:var(--muted);max-width:520px;
+    margin-top:1rem;line-height:1.7;
+    opacity:0;animation:fadeUp .8s ease forwards .5s;
+  }
+
+  /* CURRENCY SWITCH */
+  .curr-wrap {
+    display:flex;align-items:center;gap:1rem;margin-top:2.5rem;
+    opacity:0;animation:fadeUp .8s ease forwards .65s;
+  }
+  .curr-label { font-family:'Share Tech Mono',monospace;font-size:0.7rem;letter-spacing:3px;color:var(--muted); }
+  .curr-btns { display:flex;border:1px solid var(--border);overflow:hidden; }
+  .curr-btn {
+    padding:.5rem 1.2rem;background:transparent;border:none;
+    color:var(--muted);cursor:none;
+    font-family:'Share Tech Mono',monospace;font-size:0.78rem;
+    letter-spacing:2px;text-transform:uppercase;
+    transition:all .2s;border-right:1px solid var(--border);
+  }
+  .curr-btn:last-child { border-right:none; }
+  .curr-btn.active { background:linear-gradient(135deg,var(--indigo),var(--purple));color:#fff; }
+  .curr-btn:hover:not(.active) { color:var(--indigo); }
+
+  /* PRICING GRID */
+  .pricing-grid {
+    display:grid;grid-template-columns:repeat(3,1fr);
+    gap:1px;background:var(--border);
+    margin-top:3rem;
+    opacity:0;animation:fadeUp .8s ease forwards .8s;
+  }
+
+  .plan {
+    background:var(--darker);
+    padding:2.2rem 1.8rem;
+    position:relative;overflow:hidden;
+    transition:background .3s;
+  }
+  .plan::before {
+    content:'';position:absolute;top:0;left:0;
+    width:100%;height:3px;
+    background:linear-gradient(90deg,var(--indigo),var(--pink));
+    transform:scaleX(0);transform-origin:left;
+    transition:transform .4s ease;
+  }
+  .plan:hover { background:rgba(129,140,248,0.04); }
+  .plan:hover::before { transform:scaleX(1); }
+
+  .plan.featured {
+    background:rgba(129,140,248,0.05);
+    border-top:3px solid var(--purple);
+  }
+  .plan.featured::after {
+    content:'PLUS POPULAIRE';
+    position:absolute;top:0;right:1.5rem;
+    background:linear-gradient(135deg,var(--indigo),var(--purple));
+    color:#fff;
+    font-family:'Share Tech Mono',monospace;
+    font-size:.6rem;letter-spacing:2px;
+    padding:.3rem .8rem;
+  }
+
+  .plan-tag {
+    font-family:'Share Tech Mono',monospace;
+    font-size:.68rem;letter-spacing:4px;color:var(--indigo);
+    text-transform:uppercase;margin-bottom:.6rem;
+  }
+  .plan-name { font-size:1.3rem;font-weight:700;color:var(--text);margin-bottom:.5rem; }
+  .plan-desc { font-size:.9rem;color:var(--muted);line-height:1.6;margin-bottom:1.5rem; }
+
+  .plan-price { margin-bottom:1.5rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border); }
+  .price-main {
+    font-family:'Share Tech Mono',monospace;
+    font-size:1.9rem;color:var(--gold);line-height:1;
+  }
+  .price-alt { font-size:.78rem;color:var(--muted);margin-top:.4rem;font-family:'Share Tech Mono',monospace;letter-spacing:1px; }
+  .price-note { font-size:.8rem;color:var(--muted);margin-top:.3rem; }
+
+  .plan-ideal {
+    font-family:'Share Tech Mono',monospace;
+    font-size:.68rem;letter-spacing:2px;color:var(--muted);
+    padding:.5rem .8rem;border:1px solid var(--border);
+    margin-bottom:1.2rem;text-transform:uppercase;
+  }
+  .plan-ideal span { color:var(--indigo); }
+
+  .plan-features { list-style:none;margin-bottom:1.8rem; }
+  .plan-features li {
+    padding:.4rem 0;font-size:.92rem;color:var(--muted);
+    border-bottom:1px solid rgba(129,140,248,0.05);
+    display:flex;align-items:flex-start;gap:.6rem;line-height:1.5;
+  }
+  .plan-features li::before { content:'→';color:var(--indigo);font-family:'Share Tech Mono',monospace;font-size:.75rem;margin-top:.15rem;flex-shrink:0; }
+  .plan-features li strong { color:var(--text); }
+
+  .delivery {
+    display:flex;align-items:center;gap:.5rem;
+    font-family:'Share Tech Mono',monospace;font-size:.68rem;
+    color:#4ade80;letter-spacing:2px;text-transform:uppercase;
+    margin-bottom:1.2rem;
+  }
+  .delivery::before { content:'';width:6px;height:6px;border-radius:50%;background:#4ade80;animation:pulse-anim 1.5s ease-in-out infinite; }
+
+  .plan-btn {
+    display:block;text-align:center;
+    padding:.85rem;text-decoration:none;
+    font-family:'Rajdhani',sans-serif;font-weight:700;
+    font-size:1rem;letter-spacing:2px;text-transform:uppercase;
+    transition:all .3s;
+  }
+  .plan-btn.primary { background:linear-gradient(135deg,var(--indigo),var(--pink));color:#fff; }
+  .plan-btn.outline { border:1px solid var(--indigo);color:var(--indigo); }
+  .plan-btn.outline:hover { background:rgba(129,140,248,0.1); }
+  .plan-btn.gold-btn { border:1px solid var(--gold);color:var(--gold); }
+  .plan-btn.gold-btn:hover { background:rgba(247,201,126,0.08); }
+
+  /* SECTION ÉTUDIANT */
+  .student-section {
+    margin-top:5rem;
+    opacity:0;animation:fadeUp .8s ease forwards 1s;
+  }
+  .student-header {
+    display:flex;align-items:center;gap:1rem;
+    padding:1.5rem;
+    border:1px solid rgba(247,201,126,0.2);
+    background:rgba(247,201,126,0.03);
+    margin-bottom:2rem;
+  }
+  .student-header .icon { font-size:2rem; }
+  .student-header h2 { font-size:1.4rem;font-weight:700;color:var(--gold); }
+  .student-header p { font-size:.9rem;color:var(--muted);line-height:1.5; }
+
+  .student-grid {
+    display:grid;grid-template-columns:repeat(3,1fr);
+    gap:1px;background:rgba(247,201,126,0.1);
+  }
+  .student-plan {
+    background:var(--darker);padding:1.8rem 1.5rem;
+    border-bottom:2px solid transparent;
+    transition:all .3s;
+  }
+  .student-plan:hover { background:rgba(247,201,126,0.03);border-bottom-color:var(--gold); }
+
+  .student-tag { font-family:'Share Tech Mono',monospace;font-size:.65rem;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:.5rem; }
+  .student-name { font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:.5rem; }
+  .student-price { font-family:'Share Tech Mono',monospace;font-size:1.6rem;color:var(--gold);margin:.8rem 0 .3rem; }
+  .student-alt { font-size:.75rem;color:var(--muted);font-family:'Share Tech Mono',monospace;margin-bottom:1rem; }
+
+  .hours-box {
+    padding:.8rem;margin:.8rem 0;
+    background:rgba(247,201,126,0.04);
+    border-left:2px solid rgba(247,201,126,0.3);
+    font-size:.83rem;color:var(--muted);line-height:1.7;
+  }
+  .hours-box strong { color:var(--text); }
+
+  /* NOTE */
+  .pricing-note {
+    margin-top:2rem;padding:1.2rem 1.5rem;
+    border:1px solid var(--border);
+    display:flex;gap:1rem;align-items:flex-start;
+  }
+  .note-tag { font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--indigo);letter-spacing:2px;white-space:nowrap;margin-top:.1rem; }
+  .note-text { font-size:.9rem;color:var(--muted);line-height:1.6; }
+  .note-text strong { color:var(--text); }
+
+  /* FAQ PRIX */
+  .faq { margin-top:4rem;opacity:0;animation:fadeUp .8s ease forwards 1.2s; }
+  .faq-item { border-bottom:1px solid var(--border); }
+  .faq-q {
+    width:100%;text-align:left;background:none;border:none;
+    padding:1.2rem 0;cursor:none;
+    display:flex;justify-content:space-between;align-items:center;
+    font-family:'Rajdhani',sans-serif;font-size:1.05rem;font-weight:600;
+    color:var(--text);transition:color .2s;
+  }
+  .faq-q:hover { color:var(--indigo); }
+  .faq-q .arrow { font-family:'Share Tech Mono',monospace;color:var(--indigo);transition:transform .3s;font-size:.9rem; }
+  .faq-q.open .arrow { transform:rotate(180deg); }
+  .faq-a { display:none;padding:.2rem 0 1.2rem;font-size:.95rem;color:var(--muted);line-height:1.7; }
+  .faq-a strong { color:var(--text); }
+
+  /* FOOTER */
+  footer { position:relative;z-index:10;text-align:center;padding:2rem;border-top:1px solid var(--border);font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--muted);letter-spacing:3px; }
+
+  /* WA FLOAT */
+  .wa-float {
+    position:fixed;bottom:2rem;right:2rem;z-index:200;
+    display:flex;align-items:center;gap:8px;
+    background:linear-gradient(135deg,var(--indigo),var(--pink));
+    padding:.75rem 1.4rem;text-decoration:none;color:#fff;
+    font-family:'Share Tech Mono',monospace;font-size:.72rem;letter-spacing:2px;
+    box-shadow:0 0 30px rgba(244,114,182,.3);transition:box-shadow .3s;
+  }
+  .wa-float:hover { box-shadow:0 0 50px rgba(244,114,182,.5); }
+
+  @keyframes fadeUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+
+  @media(max-width:768px){
+    nav ul{display:none;}
+    .pricing-grid{grid-template-columns:1fr;}
+    .student-grid{grid-template-columns:1fr;}
+    body{cursor:auto;}
+    .cursor,.cursor-ring{display:none;}
+    .page{padding:7rem 5% 4rem;}
+    .plan.featured::after{font-size:.55rem;}
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursor-ring"></div>
+<canvas id="binary"></canvas>
+<div class="vignette"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html">
+    <svg class="logo-svg" viewBox="0 0 220 40" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="ng" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#818cf8"/><stop offset="100%" stop-color="#f472b6"/></linearGradient>
+        <linearGradient id="nd" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#f7c97e"/><stop offset="100%" stop-color="#f472b6"/></linearGradient>
+      </defs>
+      <rect x="0" y="4" width="4" height="32" rx="2" fill="url(#ng)"/>
+      <text x="12" y="20" font-family="Courier New,monospace" font-size="13" font-weight="700" fill="#e8eeff" letter-spacing="1">WISDOM</text>
+      <text x="12" y="35" font-family="Courier New,monospace" font-size="13" font-weight="700" fill="url(#nd)" letter-spacing="1">DEV</text>
+    </svg>
+  </a>
+  <ul>
+    <li><a href="services.html">Services</a></li>
+    <li><a href="pricing.html" class="active">Tarifs</a></li>
+    <li><a href="projects.html">Projets</a></li>
+    <li><a href="about.html">À propos</a></li>
+    <li><a href="contact.html">Contact</a></li>
+  </ul>
+  <div class="nav-status"><div class="pulse"></div>DISPONIBLE</div>
+</nav>
+
+<!-- PAGE -->
+<div class="page">
+
+  <div class="eyebrow">// 02 · Tarifs</div>
+  <h1>Des prix <span class="grad">honnêtes.</span><br>Aucune surprise.</h1>
+  <p class="page-intro">Tout est affiché clairement. Vous savez exactement ce que vous payez, ce que vous recevez, et quand. Le paiement se fait en 2 fois : 50% au démarrage, 50% à la livraison.</p>
+
+  <!-- Currency switch -->
+  <div class="curr-wrap">
+    <span class="curr-label">Afficher en :</span>
+    <div class="curr-btns">
+      <button class="curr-btn active" onclick="setCurr('xof',this)">FCFA</button>
+      <button class="curr-btn" onclick="setCurr('eur',this)">EUR €</button>
+      <button class="curr-btn" onclick="setCurr('usd',this)">USD $</button>
+    </div>
+  </div>
+
+  <!-- PRICING GRID -->
+  <div class="pricing-grid">
+
+    <!-- STARTER -->
+    <div class="plan">
+      <div class="plan-tag">Formule 01</div>
+      <div class="plan-name">Site Vitrine Essentiel</div>
+      <div class="plan-desc">Votre première présence professionnelle en ligne. Simple, propre, efficace. Vos clients vous trouvent sur Google.</div>
+      <div class="plan-price">
+        <div class="price-main" id="p1">45 000 FCFA</div>
+        <div class="price-alt" id="a1">≈ 69 € · $75 USD</div>
+        <div class="price-note">paiement unique · pas d'abonnement</div>
+      </div>
+      <div class="plan-ideal">Idéal pour : <span>Artisans · Boutiques · Prestataires</span></div>
+      <ul class="plan-features">
+        <li>Jusqu'à <strong>3 pages</strong> sur mesure</li>
+        <li>Design personnalisé à vos couleurs</li>
+        <li><strong>Mobile-first</strong> — optimisé téléphone</li>
+        <li>Bouton WhatsApp intégré</li>
+        <li>Formulaire de contact</li>
+        <li>Localisation Google Maps</li>
+        <li>Hébergement offert <strong>1er mois</strong></li>
+        <li>Support WhatsApp <strong>30 jours</strong></li>
+      </ul>
+      <div class="delivery">Livraison 5 à 7 jours</div>
+      <a href="https://wa.me/2290199191971?text=Bonjour%20Wisdom,%20je%20suis%20intéressé%20par%20la%20formule%20Starter" class="plan-btn outline">Démarrer ce projet</a>
+    </div>
+
+    <!-- PRO — FEATURED -->
+    <div class="plan featured">
+      <div class="plan-tag">Formule 02</div>
+      <div class="plan-name">Site Vitrine Complet</div>
+      <div class="plan-desc">La formule la plus choisie. Plus de pages, catalogue de produits, référencement Google inclus. Votre image en ligne est vraiment soignée.</div>
+      <div class="plan-price">
+        <div class="price-main" id="p2">80 000 FCFA</div>
+        <div class="price-alt" id="a2">≈ 122 € · $133 USD</div>
+        <div class="price-note">paiement unique · pas d'abonnement</div>
+      </div>
+      <div class="plan-ideal">Idéal pour : <span>PME · Écoles · Restaurants · ONG</span></div>
+      <ul class="plan-features">
+        <li>Jusqu'à <strong>5 pages</strong> sur mesure</li>
+        <li>Catalogue produits ou services avec photos</li>
+        <li>Design premium personnalisé</li>
+        <li><strong>SEO Google</strong> de base inclus</li>
+        <li>Formulaire contact + WhatsApp</li>
+        <li>Google Maps + horaires</li>
+        <li>Galerie photos intégrée</li>
+        <li>Hébergement offert <strong>2 mois</strong></li>
+        <li>Support WhatsApp <strong>60 jours</strong></li>
+      </ul>
+      <div class="delivery">Livraison 7 à 10 jours</div>
+      <a href="https://wa.me/2290199191971?text=Bonjour%20Wisdom,%20je%20suis%20intéressé%20par%20la%20formule%20Pro" class="plan-btn primary">Démarrer ce projet</a>
+    </div>
+
+    <!-- PREMIUM -->
+    <div class="plan">
+      <div class="plan-tag">Formule 03</div>
+      <div class="plan-name">Plateforme Sur Mesure</div>
+      <div class="plan-desc">Votre idée est ambitieuse — marketplace, réservation, espace membres. On construit quelque chose de vraiment unique.</div>
+      <div class="plan-price">
+        <div class="price-main" id="p3">À partir de 150 000 FCFA</div>
+        <div class="price-alt" id="a3">≈ à partir de 229 € · $250 USD</div>
+        <div class="price-note">devis personnalisé selon le projet</div>
+      </div>
+      <div class="plan-ideal">Idéal pour : <span>Startups · Marketplaces · Systèmes</span></div>
+      <ul class="plan-features">
+        <li>Pages <strong>illimitées</strong></li>
+        <li>Inscriptions et profils utilisateurs</li>
+        <li>Backend + base de données sécurisée</li>
+        <li>Tableau de bord admin</li>
+        <li>Paiement mobile <strong>(MoMo)</strong></li>
+        <li>SEO avancé</li>
+        <li>Hébergement offert <strong>3 mois</strong></li>
+        <li>Support WhatsApp <strong>90 jours</strong></li>
+      </ul>
+      <div class="delivery">Délai selon complexité</div>
+      <a href="https://wa.me/2290199191971?text=Bonjour%20Wisdom,%20j'ai%20un%20projet%20ambitieux%20à%20discuter" class="plan-btn gold-btn">Discuter mon projet</a>
+    </div>
+
+  </div>
+
+  <div class="pricing-note">
+    <div class="note-tag">// NOTE</div>
+    <div class="note-text"><strong>Pas sûr de quelle formule choisir ?</strong> Décrivez-moi votre idée sur WhatsApp. Je vous réponds dans la journée avec une recommandation honnête. Le devis est gratuit. Toujours.</div>
+  </div>
+
+  <!-- SECTION ÉTUDIANT -->
+  <div class="student-section">
+
+    <div class="student-header">
+      <div class="icon">🎓</div>
+      <div>
+        <h2>Tarif Étudiant — Solidarité</h2>
+        <p>Je suis étudiant aussi. Je sais ce que ça coûte de vouloir se lancer sans avoir les moyens. Ce tarif, c'est un geste entre nous qui construisons quelque chose depuis zéro. <strong style="color:var(--text)">Sur présentation de carte d'étudiant valide.</strong></p>
+      </div>
+    </div>
+
+    <div class="student-grid">
+
+      <div class="student-plan">
+        <div class="student-tag">Étudiant · Niveau 1</div>
+        <div class="student-name">Page Portfolio / Projet</div>
+        <div class="student-price" id="sp1">25 000 FCFA</div>
+        <div class="student-alt" id="sa1">≈ 38 € · $42 USD</div>
+        <div class="hours-box">
+          ⏱ <strong>10 à 15 heures</strong> de travail réel<br>
+          🌙 Souvent <strong>la nuit</strong> — quand tout le monde dort<br>
+          🐛 Des bugs qui peuvent prendre <strong>des heures</strong>
+        </div>
+        <ul class="plan-features" style="margin-bottom:1.2rem;">
+          <li>1 page complète responsive</li>
+          <li>Design personnalisé</li>
+          <li>Bouton WhatsApp / contact</li>
+          <li>Support <strong>15 jours</strong></li>
+        </ul>
+        <a href="https://wa.me/2290199191971?text=Bonjour%20Wisdom,%20je%20suis%20étudiant,%20tarif%20niveau%201" class="plan-btn gold-btn" style="border-color:var(--gold);color:var(--gold);">Je suis étudiant</a>
+      </div>
+
+      <div class="student-plan" style="border-bottom:2px solid var(--gold);">
+        <div class="student-tag">Étudiant · Niveau 2 ✦</div>
+        <div class="student-name">Site Vitrine Complet</div>
+        <div class="student-price" id="sp2">45 000 FCFA</div>
+        <div class="student-alt" id="sa2">≈ 69 € · $75 USD</div>
+        <div class="hours-box">
+          ⏱ <strong>20 à 30 heures</strong> de développement<br>
+          📐 Chaque pixel <strong>ajusté</strong> sur tous les écrans<br>
+          🔒 Sécurité <strong>réseau</strong> intégrée — ma formation
+        </div>
+        <ul class="plan-features" style="margin-bottom:1.2rem;">
+          <li>3 à 4 pages sur mesure</li>
+          <li>SEO Google de base</li>
+          <li>Formulaire + WhatsApp</li>
+          <li>Support <strong>30 jours</strong></li>
+        </ul>
+        <a href="https://wa.me/2290199191971?text=Bonjour%20Wisdom,%20je%20suis%20étudiant,%20tarif%20niveau%202" class="plan-btn gold-btn" style="border-color:var(--gold);color:var(--gold);">Je suis étudiant</a>
+      </div>
+
+      <div class="student-plan">
+        <div class="student-tag">Étudiant · Niveau 3</div>
+        <div class="student-name">Plateforme / App Web</div>
+        <div class="student-price" id="sp3">À partir de 80 000 FCFA</div>
+        <div class="student-alt" id="sa3">≈ à partir de 122 € · $133</div>
+        <div class="hours-box">
+          ⏱ <strong>50 à 100+ heures</strong> de code<br>
+          😴 <strong>Weekends sacrifiés</strong> pour ton projet<br>
+          🚀 Déploiement sur <strong>serveur professionnel</strong>
+        </div>
+        <ul class="plan-features" style="margin-bottom:1.2rem;">
+          <li>Backend complet + base de données</li>
+          <li>Système d'inscription users</li>
+          <li>Déploiement inclus</li>
+          <li>Support <strong>60 jours</strong></li>
+        </ul>
+        <a href="https://wa.me/2290199191971?text=Bonjour%20Wisdom,%20je%20suis%20étudiant,%20projet%20plateforme" class="plan-btn gold-btn" style="border-color:var(--gold);color:var(--gold);">Discuter mon projet</a>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <div class="faq">
+    <div class="eyebrow" style="opacity:1;animation:none;margin-bottom:1.5rem;">// Questions fréquentes</div>
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        Comment se passe le paiement ?
+        <span class="arrow">↓</span>
+      </button>
+      <div class="faq-a">50% au démarrage du projet, 50% à la livraison. Vous ne payez le reste que quand vous êtes satisfait du résultat. <strong>Pas de paiement intégral à l'avance.</strong></div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        Et si je ne suis pas satisfait du résultat ?
+        <span class="arrow">↓</span>
+      </button>
+      <div class="faq-a">On fait des modifications jusqu'à ce que vous soyez satisfait. Vous avez <strong>2 révisions incluses</strong> dans chaque formule. Au-delà, on discute ensemble selon la nature des changements.</div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        Combien coûte l'hébergement après la période offerte ?
+        <span class="arrow">↓</span>
+      </button>
+      <div class="faq-a">Environ <strong>3 000 à 5 000 FCFA/mois</strong> selon le plan Hostinger choisi. Je vous aide à le configurer et à le payer. Pas de mauvaise surprise.</div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        Vous êtes à Cotonou — peut-on travailler à distance ?
+        <span class="arrow">↓</span>
+      </button>
+      <div class="faq-a">Oui, 100% à distance. Tout passe par <strong>WhatsApp</strong> — échanges, maquettes, validation, livraison. Vous n'avez rien à installer ni à vous déplacer.</div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        Je n'ai pas de textes ni de photos pour mon site — c'est un problème ?
+        <span class="arrow">↓</span>
+      </button>
+      <div class="faq-a">Pas du tout. <strong>Je vous aide à rédiger les textes</strong> selon votre activité. Pour les photos, je peux utiliser des images libres de droits professionnelles adaptées à votre secteur.</div>
+    </div>
+
+  </div>
+
+</div><!-- fin .page -->
+
+<footer>&lt; Wisdom Dev · Tarifs · Cotonou, Bénin · 2025 /&gt;</footer>
+
+<a href="https://wa.me/2290199191971" class="wa-float">💬 +229 01 99 19 19 71</a>
+
+<script>
+// CURSEUR
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cursor.style.left=mx+'px';cursor.style.top=my+'px';});
+function animRing(){rx+=(mx-rx)*.12;ry+=(my-ry)*.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(animRing);}
+animRing();
+document.querySelectorAll('a,button').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{cursor.style.width='16px';cursor.style.height='16px';cursor.style.background='#818cf8';ring.style.width='50px';ring.style.height='50px';ring.style.borderColor='#f472b6';});
+  el.addEventListener('mouseleave',()=>{cursor.style.width='10px';cursor.style.height='10px';cursor.style.background='#f472b6';ring.style.width='36px';ring.style.height='36px';ring.style.borderColor='#818cf8';});
+});
+
+// BINARY
+const canvas=document.getElementById('binary');
+const ctx=canvas.getContext('2d');
+function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+resize();window.addEventListener('resize',resize);
+const fontSize=14,chars='01';
+let cols,drops,dropColors,dropSpeeds,dropOpacities;
+function initDrops(){cols=Math.floor(canvas.width/fontSize);drops=Array(cols).fill(0).map(()=>Math.random()*-canvas.height/fontSize);dropColors=Array(cols).fill(0).map(()=>Math.random());dropSpeeds=Array(cols).fill(0).map(()=>.4+Math.random()*.8);dropOpacities=Array(cols).fill(0).map(()=>.5+Math.random()*.5);}
+initDrops();
+function draw(){
+  ctx.fillStyle='rgba(3,2,9,0.05)';ctx.fillRect(0,0,canvas.width,canvas.height);
+  for(let i=0;i<drops.length;i++){
+    const char=Math.random()>.5?'1':'0';const y=drops[i]*fontSize;
+    let r,g,b;
+    if(dropColors[i]<.33){r=129;g=140;b=248;}
+    else if(dropColors[i]<.66){r=244;g=114;b=182;}
+    else{r=0;g=212;b=255;}
+    const trailPos=drops[i]-Math.floor(drops[i]);
+    let opacity;
+    if(trailPos<.1){ctx.fillStyle='rgba(255,255,255,0.95)';}
+    else{opacity=.35+dropOpacities[i]*.4;ctx.fillStyle=`rgba(${r},${g},${b},${opacity})`;}
+    ctx.font=`bold ${fontSize}px 'Share Tech Mono',monospace`;
+    ctx.fillText(char,i*fontSize,y);
+    if(y>canvas.height&&Math.random()>.972){drops[i]=Math.random()*-30;dropColors[i]=Math.random();dropSpeeds[i]=.4+Math.random()*.8;dropOpacities[i]=.5+Math.random()*.5;}
+    drops[i]+=dropSpeeds[i];
+  }
+}
+setInterval(draw,45);
+
+// CURRENCY
+const prices={
+  xof:{p1:'45 000 FCFA',a1:'≈ 69 € · $75 USD',p2:'80 000 FCFA',a2:'≈ 122 € · $133 USD',p3:'À partir de 150 000 FCFA',a3:'≈ à partir de 229 € · $250 USD',sp1:'25 000 FCFA',sa1:'≈ 38 € · $42 USD',sp2:'45 000 FCFA',sa2:'≈ 69 € · $75 USD',sp3:'À partir de 80 000 FCFA',sa3:'≈ à partir de 122 € · $133'},
+  eur:{p1:'69 €',a1:'≈ 45 000 FCFA · $75 USD',p2:'122 €',a2:'≈ 80 000 FCFA · $133 USD',p3:'À partir de 229 €',a3:'≈ à partir de 150 000 FCFA · $250 USD',sp1:'38 €',sa1:'≈ 25 000 FCFA · $42 USD',sp2:'69 €',sa2:'≈ 45 000 FCFA · $75 USD',sp3:'À partir de 122 €',sa3:'≈ à partir de 80 000 FCFA · $133'},
+  usd:{p1:'$75 USD',a1:'≈ 45 000 FCFA · 69 €',p2:'$133 USD',a2:'≈ 80 000 FCFA · 122 €',p3:'À partir de $250 USD',a3:'≈ à partir de 150 000 FCFA · 229 €',sp1:'$42 USD',sa1:'≈ 25 000 FCFA · 38 €',sp2:'$75 USD',sa2:'≈ 45 000 FCFA · 69 €',sp3:'À partir de $133 USD',sa3:'≈ à partir de 80 000 FCFA · 122 €'}
+};
+function setCurr(c,btn){
+  document.querySelectorAll('.curr-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const p=prices[c];
+  Object.keys(p).forEach(k=>{const el=document.getElementById(k);if(el)el.textContent=p[k];});
+}
+
+// FAQ
+function toggleFaq(btn){
+  const a=btn.nextElementSibling;
+  const isOpen=a.style.display==='block';
+  document.querySelectorAll('.faq-a').forEach(x=>x.style.display='none');
+  document.querySelectorAll('.faq-q').forEach(x=>x.classList.remove('open'));
+  if(!isOpen){a.style.display='block';btn.classList.add('open');}
+}
+</script>
+</body>
+</html>
