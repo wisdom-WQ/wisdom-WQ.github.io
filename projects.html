@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Projets — Wisdom Dev · Développeur Web Cotonou</title>
+<meta name="description" content="Projets réels de Wisdom Dev — Afriwork, Trovex, BéninEmploi, BéninMarché. Plateformes fullstack construites pour l'Afrique.">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+  :root{
+    --indigo:#818cf8;--purple:#c084fc;--pink:#f472b6;
+    --gold:#f7c97e;--cyan:#00d4ff;
+    --dark:#060412;--darker:#030209;
+    --text:#e8eeff;--muted:#4a4070;
+    --border:rgba(129,140,248,0.12);--surface:rgba(129,140,248,0.04);
+  }
+  html{scroll-behavior:smooth;}
+  body{background:var(--darker);color:var(--text);font-family:'Rajdhani',sans-serif;font-size:17px;line-height:1.7;overflow-x:hidden;cursor:none;}
+
+  .cursor{position:fixed;width:10px;height:10px;background:var(--pink);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .2s,height .2s,background .2s;mix-blend-mode:screen;}
+  .cursor-ring{position:fixed;width:36px;height:36px;border:1px solid var(--indigo);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:all .12s ease;mix-blend-mode:screen;}
+
+  canvas#binary{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:0.35;}
+  .vignette{position:fixed;inset:0;background:radial-gradient(ellipse at 50% 30%,rgba(3,2,9,0.5) 0%,rgba(3,2,9,0.92) 70%);z-index:1;pointer-events:none;}
+
+  nav{position:fixed;top:0;width:100%;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:1.2rem 5%;background:rgba(3,2,9,0.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);}
+  .logo-svg{height:36px;}
+  nav ul{display:flex;gap:2rem;list-style:none;}
+  nav a{color:var(--muted);text-decoration:none;font-family:'Share Tech Mono',monospace;font-size:0.78rem;letter-spacing:3px;text-transform:uppercase;transition:color .3s;}
+  nav a:hover,nav a.active{color:var(--indigo);}
+  .nav-status{font-family:'Share Tech Mono',monospace;font-size:0.7rem;letter-spacing:2px;color:#4ade80;display:flex;align-items:center;gap:6px;}
+  .pulse{width:6px;height:6px;border-radius:50%;background:#4ade80;animation:pulse-anim 2s ease-in-out infinite;}
+  @keyframes pulse-anim{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
+
+  .page{position:relative;z-index:10;max-width:1100px;margin:0 auto;padding:8rem 5% 6rem;}
+
+  .eyebrow{font-family:'Share Tech Mono',monospace;font-size:0.72rem;letter-spacing:5px;color:var(--indigo);text-transform:uppercase;margin-bottom:1rem;display:flex;align-items:center;gap:12px;opacity:0;animation:fadeUp .8s ease forwards .2s;}
+  .eyebrow::before{content:'';width:30px;height:1px;background:linear-gradient(90deg,transparent,var(--indigo));}
+
+  h1{font-size:clamp(2.2rem,6vw,4rem);font-weight:700;line-height:1.1;letter-spacing:-1px;opacity:0;animation:fadeUp .8s ease forwards .35s;}
+  h1 .grad{background:linear-gradient(135deg,var(--indigo),var(--purple),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+
+  .page-intro{font-size:1.05rem;color:var(--muted);max-width:540px;margin-top:1rem;line-height:1.7;opacity:0;animation:fadeUp .8s ease forwards .5s;}
+
+  /* FILTER TABS */
+  .filter-tabs{display:flex;gap:1px;background:var(--border);margin-top:2.5rem;margin-bottom:3rem;opacity:0;animation:fadeUp .8s ease forwards .65s;overflow-x:auto;}
+  .filter-btn{padding:.75rem 1.5rem;background:var(--darker);border:none;color:var(--muted);font-family:'Share Tech Mono',monospace;font-size:0.72rem;letter-spacing:3px;text-transform:uppercase;cursor:none;transition:all .2s;white-space:nowrap;}
+  .filter-btn:hover{color:var(--text);background:var(--surface);}
+  .filter-btn.active{background:linear-gradient(135deg,rgba(129,140,248,0.15),rgba(244,114,182,0.15));color:var(--indigo);border-bottom:2px solid var(--indigo);}
+
+  /* PROJECTS GRID */
+  .projects-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--border);opacity:0;animation:fadeUp .8s ease forwards .8s;}
+
+  .project-card{background:rgba(3,2,9,0.92);padding:2.2rem;position:relative;overflow:hidden;transition:background .3s;}
+  .project-card::before{content:'';position:absolute;left:0;top:0;width:4px;height:100%;background:linear-gradient(180deg,var(--indigo),var(--pink));transform:scaleY(0);transform-origin:top;transition:transform .4s ease;}
+  .project-card:hover{background:rgba(129,140,248,0.04);}
+  .project-card:hover::before{transform:scaleY(1);}
+
+  .project-card.featured{grid-column:span 2;display:grid;grid-template-columns:1fr 1fr;gap:2rem;}
+
+  .card-header{margin-bottom:1.2rem;}
+  .card-type{font-family:'Share Tech Mono',monospace;font-size:0.65rem;letter-spacing:4px;color:var(--muted);text-transform:uppercase;margin-bottom:0.5rem;display:flex;align-items:center;gap:8px;}
+  .card-type-dot{width:6px;height:6px;border-radius:50%;}
+  .card-num{font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--border);position:absolute;top:1.5rem;right:1.5rem;}
+
+  .project-card h2{font-size:1.5rem;font-weight:700;color:var(--text);margin-bottom:0.6rem;line-height:1.2;}
+  .project-card p{font-size:0.93rem;color:var(--muted);line-height:1.7;}
+
+  .project-scale{margin-top:1.2rem;padding:1rem;background:rgba(129,140,248,0.04);border:1px solid var(--border);}
+  .scale-label{font-family:'Share Tech Mono',monospace;font-size:0.62rem;letter-spacing:3px;color:var(--indigo);text-transform:uppercase;margin-bottom:0.6rem;}
+  .scale-items{display:flex;flex-wrap:wrap;gap:0.5rem;}
+  .scale-item{font-family:'Share Tech Mono',monospace;font-size:0.68rem;padding:0.25rem 0.7rem;border:1px solid var(--border);color:var(--muted);letter-spacing:1px;}
+
+  .tech-row{display:flex;flex-wrap:wrap;gap:0.4rem;margin-top:1.2rem;}
+  .tech-badge{font-family:'Share Tech Mono',monospace;font-size:0.65rem;padding:0.2rem 0.6rem;border:1px solid var(--border);color:var(--muted);letter-spacing:1px;transition:border-color .2s,color .2s;}
+  .project-card:hover .tech-badge{border-color:rgba(129,140,248,0.3);color:var(--indigo);}
+
+  .status-badge{display:inline-flex;align-items:center;gap:5px;font-family:'Share Tech Mono',monospace;font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;margin-top:1rem;padding:0.3rem 0.8rem;border:1px solid;}
+  .status-live{border-color:rgba(74,222,128,0.3);color:#4ade80;background:rgba(74,222,128,0.05);}
+  .status-live::before{content:'';width:5px;height:5px;border-radius:50%;background:#4ade80;animation:pulse-anim 1.5s ease-in-out infinite;}
+  .status-dev{border-color:rgba(247,201,126,0.3);color:var(--gold);background:rgba(247,201,126,0.05);}
+  .status-dev::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--gold);}
+
+  /* AVIS */
+  .avis-section{margin-top:5rem;opacity:0;animation:fadeUp .8s ease forwards 1s;}
+  .section-head{margin-bottom:2rem;}
+  .section-head h2{font-size:1.8rem;font-weight:700;color:var(--text);}
+  .section-head p{font-size:0.95rem;color:var(--muted);margin-top:0.4rem;}
+
+  .avis-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);margin-bottom:2rem;}
+  .avis-card{background:rgba(3,2,9,0.92);padding:1.8rem;transition:background .3s;}
+  .avis-card:hover{background:var(--surface);}
+  .avis-stars{color:var(--gold);font-size:1rem;letter-spacing:2px;margin-bottom:0.8rem;}
+  .avis-text{font-size:0.93rem;color:var(--muted);line-height:1.7;font-style:italic;margin-bottom:1rem;}
+  .avis-text::before{content:'"';color:var(--indigo);font-size:1.4rem;line-height:0;vertical-align:-0.3rem;margin-right:3px;}
+  .avis-text::after{content:'"';color:var(--indigo);font-size:1.4rem;line-height:0;vertical-align:-0.3rem;margin-left:3px;}
+  .avis-author{font-family:'Share Tech Mono',monospace;font-size:0.68rem;letter-spacing:2px;color:var(--indigo);}
+  .avis-role{font-size:0.8rem;color:var(--muted);margin-top:2px;}
+
+  /* FORMULAIRE AVIS */
+  .avis-form-wrap{border:1px solid var(--border);padding:2rem;background:var(--surface);}
+  .form-title{font-family:'Share Tech Mono',monospace;font-size:0.72rem;letter-spacing:4px;color:var(--indigo);text-transform:uppercase;margin-bottom:1.5rem;}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;}
+  .form-field{display:flex;flex-direction:column;gap:0.4rem;}
+  .form-field label{font-family:'Share Tech Mono',monospace;font-size:0.65rem;letter-spacing:3px;color:var(--muted);text-transform:uppercase;}
+  .form-field input,.form-field textarea,.form-field select{background:rgba(129,140,248,0.04);border:1px solid var(--border);color:var(--text);padding:0.75rem 1rem;font-family:'Rajdhani',sans-serif;font-size:1rem;outline:none;transition:border-color .3s;resize:none;}
+  .form-field input:focus,.form-field textarea:focus,.form-field select:focus{border-color:var(--indigo);}
+  .form-field select option{background:var(--darker);}
+  .star-select{display:flex;gap:0.5rem;margin-top:0.3rem;}
+  .star-btn{background:none;border:none;font-size:1.4rem;cursor:none;color:var(--muted);transition:color .2s;line-height:1;}
+  .star-btn.active,.star-btn:hover{color:var(--gold);}
+  .submit-btn{margin-top:1.2rem;padding:.85rem 2rem;background:linear-gradient(135deg,var(--indigo),var(--pink));color:#fff;border:none;font-family:'Rajdhani',sans-serif;font-size:1rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:none;transition:opacity .3s;width:100%;}
+  .submit-btn:hover{opacity:0.85;}
+  .form-success{display:none;text-align:center;padding:1.5rem;font-family:'Share Tech Mono',monospace;font-size:0.8rem;letter-spacing:2px;color:#4ade80;}
+
+  footer{position:relative;z-index:10;text-align:center;padding:2rem;border-top:1px solid var(--border);font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--muted);letter-spacing:3px;}
+
+  .wa-float{position:fixed;bottom:2rem;right:2rem;z-index:200;display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--indigo),var(--pink));padding:.75rem 1.4rem;text-decoration:none;color:#fff;font-family:'Share Tech Mono',monospace;font-size:.72rem;letter-spacing:2px;box-shadow:0 0 30px rgba(244,114,182,.3);transition:box-shadow .3s;}
+  .wa-float:hover{box-shadow:0 0 50px rgba(244,114,182,.5);}
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+
+  @media(max-width:768px){
+    nav ul{display:none;}
+    body{cursor:auto;}
+    .cursor,.cursor-ring{display:none;}
+    .page{padding:7rem 5% 4rem;}
+    .projects-grid{grid-template-columns:1fr;}
+    .project-card.featured{grid-column:span 1;grid-template-columns:1fr;}
+    .avis-grid{grid-template-columns:1fr;}
+    .form-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursor-ring"></div>
+<canvas id="binary"></canvas>
+<div class="vignette"></div>
+
+<nav>
+  <a href="index.html">
+    <svg class="logo-svg" viewBox="0 0 220 40" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="ng" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#818cf8"/><stop offset="100%" stop-color="#f472b6"/></linearGradient>
+        <linearGradient id="nd" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#f7c97e"/><stop offset="100%" stop-color="#f472b6"/></linearGradient>
+      </defs>
+      <rect x="0" y="4" width="4" height="32" rx="2" fill="url(#ng)"/>
+      <text x="12" y="20" font-family="Courier New,monospace" font-size="13" font-weight="700" fill="#e8eeff" letter-spacing="1">WISDOM</text>
+      <text x="12" y="35" font-family="Courier New,monospace" font-size="13" font-weight="700" fill="url(#nd)" letter-spacing="1">DEV</text>
+    </svg>
+  </a>
+  <ul>
+    <li><a href="services.html">Services</a></li>
+    <li><a href="pricing.html">Tarifs</a></li>
+    <li><a href="projects.html" class="active">Projets</a></li>
+    <li><a href="about.html">À propos</a></li>
+    <li><a href="contact.html">Contact</a></li>
+  </ul>
+  <div class="nav-status"><div class="pulse"></div>DISPONIBLE</div>
+</nav>
+
+<div class="page">
+
+  <div class="eyebrow">// 03 · Projets</div>
+  <h1>Ce que j'ai <span class="grad">construit.</span></h1>
+  <p class="page-intro">Des projets réels, déployés, conçus pour résoudre de vrais problèmes au Bénin et en Afrique. Pas des exercices — des plateformes vivantes.</p>
+
+  <!-- FILTER -->
+  <div class="filter-tabs">
+    <button class="filter-btn active" onclick="filter('all',this)">Tous les projets</button>
+    <button class="filter-btn" onclick="filter('fullstack',this)">Fullstack</button>
+    <button class="filter-btn" onclick="filter('frontend',this)">Frontend</button>
+    <button class="filter-btn" onclick="filter('marketplace',this)">Marketplace</button>
+  </div>
+
+  <!-- PROJETS -->
+  <div class="projects-grid" id="projects-grid">
+
+    <!-- AFRIWORK — featured -->
+    <div class="project-card featured" data-cat="fullstack">
+      <div>
+        <div class="card-num">01</div>
+        <div class="card-header">
+          <div class="card-type">
+            <div class="card-type-dot" style="background:#818cf8;"></div>
+            Fullstack · Backend · 8 pays FCFA
+          </div>
+          <h2>Afriwork</h2>
+          <p>Plateforme d'emploi complète couvrant 8 pays de la zone FCFA. Employeurs et candidats se rencontrent dans tous les secteurs. Authentification sécurisée, panel admin, déployé sur Railway et Firebase.</p>
+        </div>
+        <div class="tech-row">
+          <span class="tech-badge">Node.js</span>
+          <span class="tech-badge">Express</span>
+          <span class="tech-badge">MongoDB</span>
+          <span class="tech-badge">JWT</span>
+          <span class="tech-badge">Railway</span>
+          <span class="tech-badge">Firebase</span>
+        </div>
+        <div class="status-badge status-live">Déployé · En ligne</div>
+      </div>
+      <div>
+        <div class="project-scale">
+          <div class="scale-label">// Portée du projet</div>
+          <div class="scale-items">
+            <span class="scale-item">🌍 8 pays couverts</span>
+            <span class="scale-item">🔐 Auth JWT sécurisée</span>
+            <span class="scale-item">⚡ Temps réel</span>
+            <span class="scale-item">📊 Panel admin</span>
+            <span class="scale-item">💳 Paiement FCFA</span>
+          </div>
+        </div>
+        <div style="margin-top:1.2rem;padding:1rem;border:1px solid var(--border);font-size:0.88rem;color:var(--muted);line-height:1.7;">
+          <strong style="color:var(--text);font-family:'Share Tech Mono',monospace;font-size:0.7rem;letter-spacing:2px;display:block;margin-bottom:0.5rem;">// DÉFI TECHNIQUE</strong>
+          Gérer plusieurs devises et fuseaux horaires pour 8 pays différents tout en maintenant une base de données unifiée. Solution : middleware de normalisation monétaire + gestion des locales côté backend.
+        </div>
+      </div>
+    </div>
+
+    <!-- TROVEX -->
+    <div class="project-card" data-cat="marketplace">
+      <div class="card-num">02</div>
+      <div class="card-header">
+        <div class="card-type">
+          <div class="card-type-dot" style="background:#f472b6;"></div>
+          Marketplace · Artisans · Cotonou
+        </div>
+        <h2>Trovex.bj</h2>
+        <p>Connecte les Béninois aux meilleurs artisans du bâtiment à Cotonou — vitriers, menuisiers, électriciens. Géolocalisés, vérifiés, joignables en 2 minutes sur WhatsApp. Support multi-langue langues locales.</p>
+      </div>
+      <div class="project-scale">
+        <div class="scale-label">// Spécificités</div>
+        <div class="scale-items">
+          <span class="scale-item">📍 Géolocalisation</span>
+          <span class="scale-item">🌐 Multi-langue</span>
+          <span class="scale-item">💬 WhatsApp direct</span>
+        </div>
+      </div>
+      <div class="tech-row">
+        <span class="tech-badge">HTML/CSS/JS</span>
+        <span class="tech-badge">Géolocalisation API</span>
+        <span class="tech-badge">WhatsApp API</span>
+      </div>
+      <div class="status-badge status-dev">En développement</div>
+    </div>
+
+    <!-- BÉNINEMPL0I -->
+    <div class="project-card" data-cat="frontend">
+      <div class="card-num">03</div>
+      <div class="card-header">
+        <div class="card-type">
+          <div class="card-type-dot" style="background:#00d4ff;"></div>
+          Frontend · Firebase · Bénin
+        </div>
+        <h2>BéninEmploi</h2>
+        <p>Application web dédiée au marché de l'emploi béninois. Offres en temps réel, authentification Firebase, interface mobile-first pensée pour les utilisateurs locaux avec connexion parfois lente.</p>
+      </div>
+      <div class="project-scale">
+        <div class="scale-label">// Points forts</div>
+        <div class="scale-items">
+          <span class="scale-item">⚡ Temps réel</span>
+          <span class="scale-item">📱 Mobile-first</span>
+          <span class="scale-item">🔐 Firebase Auth</span>
+        </div>
+      </div>
+      <div class="tech-row">
+        <span class="tech-badge">HTML/CSS/JS</span>
+        <span class="tech-badge">Firebase Auth</span>
+        <span class="tech-badge">Firestore</span>
+        <span class="tech-badge">Mobile-first</span>
+      </div>
+      <div class="status-badge status-live">Déployé · En ligne</div>
+    </div>
+
+    <!-- BÉNINMARCHÉ -->
+    <div class="project-card" data-cat="marketplace">
+      <div class="card-num">04</div>
+      <div class="card-header">
+        <div class="card-type">
+          <div class="card-type-dot" style="background:#f7c97e;"></div>
+          Marketplace · Marchés · Bénin
+        </div>
+        <h2>BéninMarché</h2>
+        <p>Les marchés réorganisés du Bénin en ligne. Les vendeurs s'inscrivent par marché et catégorie de produit. Les clients trouvent exactement ce qu'ils cherchent sans se déplacer à l'aveugle.</p>
+      </div>
+      <div class="project-scale">
+        <div class="scale-label">// Innovation locale</div>
+        <div class="scale-items">
+          <span class="scale-item">🏪 Marchés officiels BJ</span>
+          <span class="scale-item">📦 Par catégorie</span>
+          <span class="scale-item">🌐 Multi-langue</span>
+        </div>
+      </div>
+      <div class="tech-row">
+        <span class="tech-badge">En cours</span>
+        <span class="tech-badge">Multi-langue</span>
+        <span class="tech-badge">Géolocalisation</span>
+      </div>
+      <div class="status-badge status-dev">En développement</div>
+    </div>
+
+  </div>
+
+  <!-- SECTION AVIS -->
+  <div class="avis-section">
+    <div class="section-head">
+      <div class="eyebrow" style="opacity:1;animation:none;">// Ce qu'ils en pensent</div>
+      <h2>Avis & Témoignages</h2>
+      <p>Des retours honnêtes de personnes qui ont vu ou testé mon travail.</p>
+    </div>
+
+    <!-- Avis existants -->
+    <div class="avis-grid" id="avis-grid">
+
+      <div class="avis-card">
+        <div class="avis-stars">★★★★★</div>
+        <div class="avis-text">Le portfolio est vraiment impressionnant pour quelqu'un en formation depuis seulement 7 mois. Le design est professionnel et le code est propre.</div>
+        <div class="avis-author">Gabi</div>
+        <div class="avis-role">Contact WhatsApp · Cotonou</div>
+      </div>
+
+      <div class="avis-card" style="background:rgba(129,140,248,0.03);">
+        <div class="avis-stars" style="color:var(--muted);">— — —</div>
+        <div class="avis-text" style="color:var(--muted);font-style:normal;">Votre avis sera ici. Soyez le premier à laisser un témoignage sur ce travail.</div>
+        <div class="avis-author" style="color:var(--muted);">Vous ?</div>
+        <div class="avis-role">Laissez un avis ci-dessous</div>
+      </div>
+
+      <div class="avis-card" style="background:rgba(129,140,248,0.03);">
+        <div class="avis-stars" style="color:var(--muted);">— — —</div>
+        <div class="avis-text" style="color:var(--muted);font-style:normal;">D'autres avis arriveront bientôt. Chaque projet livré est une nouvelle histoire.</div>
+        <div class="avis-author" style="color:var(--muted);">Bientôt</div>
+        <div class="avis-role">En attente</div>
+      </div>
+
+    </div>
+
+    <!-- Formulaire avis -->
+    <div class="avis-form-wrap">
+      <div class="form-title">// Laisser un avis</div>
+      <div id="avis-form">
+        <div class="form-grid">
+          <div class="form-field">
+            <label>Votre nom</label>
+            <input type="text" id="avis-nom" placeholder="Jean Koffi">
+          </div>
+          <div class="form-field">
+            <label>Votre rôle / contexte</label>
+            <input type="text" id="avis-role" placeholder="Étudiant · Client · Collègue...">
+          </div>
+        </div>
+        <div class="form-field" style="margin-bottom:1rem;">
+          <label>Note</label>
+          <div class="star-select" id="stars">
+            <button class="star-btn" onclick="setStar(1)">★</button>
+            <button class="star-btn" onclick="setStar(2)">★</button>
+            <button class="star-btn" onclick="setStar(3)">★</button>
+            <button class="star-btn" onclick="setStar(4)">★</button>
+            <button class="star-btn" onclick="setStar(5)">★</button>
+          </div>
+        </div>
+        <div class="form-field" style="margin-bottom:0;">
+          <label>Votre avis</label>
+          <textarea id="avis-text" rows="4" placeholder="Partagez votre expérience honnêtement..."></textarea>
+        </div>
+        <button class="submit-btn" onclick="submitAvis()">Publier mon avis</button>
+      </div>
+      <div class="form-success" id="form-success">
+        ✓ Merci pour votre avis — il apparaîtra après validation.
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<footer>&lt; Wisdom Dev · Projets · Cotonou, Bénin · 2025 /&gt;</footer>
+<a href="https://wa.me/2290199191971" class="wa-float">💬 +229 01 99 19 19 71</a>
+
+<script>
+// CURSEUR
+const cursor=document.getElementById('cursor');
+const ring=document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cursor.style.left=mx+'px';cursor.style.top=my+'px';});
+function animRing(){rx+=(mx-rx)*.12;ry+=(my-ry)*.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(animRing);}
+animRing();
+document.querySelectorAll('a,button').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{cursor.style.width='16px';cursor.style.height='16px';cursor.style.background='#818cf8';ring.style.width='50px';ring.style.height='50px';ring.style.borderColor='#f472b6';});
+  el.addEventListener('mouseleave',()=>{cursor.style.width='10px';cursor.style.height='10px';cursor.style.background='#f472b6';ring.style.width='36px';ring.style.height='36px';ring.style.borderColor='#818cf8';});
+});
+
+// BINARY
+const canvas=document.getElementById('binary');
+const ctx=canvas.getContext('2d');
+function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+resize();window.addEventListener('resize',resize);
+const fontSize=14;
+let cols,drops,dropColors,dropSpeeds,dropOpacities;
+function initDrops(){cols=Math.floor(canvas.width/fontSize);drops=Array(cols).fill(0).map(()=>Math.random()*-canvas.height/fontSize);dropColors=Array(cols).fill(0).map(()=>Math.random());dropSpeeds=Array(cols).fill(0).map(()=>.4+Math.random()*.8);dropOpacities=Array(cols).fill(0).map(()=>.5+Math.random()*.5);}
+initDrops();
+function draw(){
+  ctx.fillStyle='rgba(3,2,9,0.05)';ctx.fillRect(0,0,canvas.width,canvas.height);
+  for(let i=0;i<drops.length;i++){
+    const char=Math.random()>.5?'1':'0';const y=drops[i]*fontSize;
+    let r,g,b;
+    if(dropColors[i]<.33){r=129;g=140;b=248;}
+    else if(dropColors[i]<.66){r=244;g=114;b=182;}
+    else{r=0;g=212;b=255;}
+    const trailPos=drops[i]-Math.floor(drops[i]);
+    if(trailPos<.1){ctx.fillStyle='rgba(255,255,255,0.95)';}
+    else{ctx.fillStyle=`rgba(${r},${g},${b},${.35+dropOpacities[i]*.4})`;}
+    ctx.font=`bold ${fontSize}px 'Share Tech Mono',monospace`;
+    ctx.fillText(char,i*fontSize,y);
+    if(y>canvas.height&&Math.random()>.972){drops[i]=Math.random()*-30;dropColors[i]=Math.random();dropSpeeds[i]=.4+Math.random()*.8;dropOpacities[i]=.5+Math.random()*.5;}
+    drops[i]+=dropSpeeds[i];
+  }
+}
+setInterval(draw,45);
+
+// FILTER
+function filter(cat,btn){
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.project-card').forEach(card=>{
+    if(cat==='all'||card.dataset.cat===cat){
+      card.style.display='';
+      if(cat!=='all'&&card.classList.contains('featured')){
+        card.style.gridColumn='span 1';
+        card.style.display='grid';
+        card.style.gridTemplateColumns='1fr';
+      }
+    } else {
+      card.style.display='none';
+    }
+  });
+}
+
+// STARS
+let selectedStar=0;
+function setStar(n){
+  selectedStar=n;
+  document.querySelectorAll('.star-btn').forEach((b,i)=>{
+    b.classList.toggle('active',i<n);
+  });
+}
+
+// SUBMIT AVIS
+function submitAvis(){
+  const nom=document.getElementById('avis-nom').value.trim();
+  const role=document.getElementById('avis-role').value.trim();
+  const text=document.getElementById('avis-text').value.trim();
+  if(!nom||!text||selectedStar===0){
+    alert('Remplissez votre nom, votre avis et choisissez une note ⭐');
+    return;
+  }
+  document.getElementById('avis-form').style.display='none';
+  document.getElementById('form-success').style.display='block';
+}
+</script>
+</body>
+</html>
